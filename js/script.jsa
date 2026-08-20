@@ -1,39 +1,3 @@
-/* ==========================================================
-   ACADEMIA POLIGLOTA
-   AUTONOMOUS COURSE ENGINE
-========================================================== */
-
-
-/* ==========================================================
-   COURSE CONTENT
-==========================================================
-
-   THIS IS THE MAIN AREA YOU WILL EDIT.
-
-   The engine below handles:
-
-   - lesson cards
-   - explanations
-   - videos
-   - audio
-   - multiple choice
-   - written exercises
-   - fill in the blanks
-   - speaking
-   - automatic correction
-   - scoring
-   - progress
-   - lesson completion
-   - saved progress
-
-========================================================== */
-
-
-const COURSE_DATA = {
-
-    title: "English Course",
-
-    units: [
 
         {
             id: 1,
