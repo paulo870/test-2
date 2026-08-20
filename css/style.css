@@ -1,459 +1,1746 @@
-<!DOCTYPE html>
-<html lang="en">
+/* ==========================================================
+   AUTONOMOUS COURSE
+   PREMIUM LEARNING PLATFORM
+========================================================== */
 
-<head>
 
-    <meta charset="UTF-8">
+/* ==========================================================
+   ROOT
+========================================================== */
 
-    <title>Academia Poliglota — Autonomous Course</title>
+:root {
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    --navy-950: #091426;
+    --navy-900: #0f1f3d;
+    --navy-800: #162b50;
+    --navy-700: #1d3965;
 
-    <link rel="stylesheet" href="css/style.css">
+    --blue: #2f6fed;
+    --blue-dark: #245bd0;
+    --blue-light: #edf4ff;
 
-</head>
+    --cyan: #42b9d8;
 
-<body>
+    --green: #21a366;
+    --green-light: #eaf8f1;
 
+    --orange: #e59b32;
+    --orange-light: #fff6e7;
 
-<!-- =========================================================
-     APPLICATION
-========================================================= -->
+    --red: #d9535f;
+    --red-light: #fff0f2;
 
-<div id="app">
+    --white: #ffffff;
 
+    --surface: #ffffff;
+    --background: #f4f7fb;
 
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
+    --text: #17243b;
+    --text-soft: #637089;
+    --text-muted: #98a4b7;
 
-    <aside class="sidebar">
+    --border: #e4e9f1;
 
-        <div class="brand">
+    --sidebar-width: 278px;
 
-            <img
-                src="images/logo.png"
-                alt="Academia Poliglota"
-            >
+    --radius-sm: 8px;
+    --radius: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 26px;
 
-        </div>
+    --shadow-sm:
+        0 2px 8px rgba(15, 31, 61, .04);
 
+    --shadow:
+        0 10px 35px rgba(15, 31, 61, .07);
 
-        <div class="course-label">
-            AUTONOMOUS COURSE
-        </div>
+    --shadow-lg:
+        0 25px 70px rgba(15, 31, 61, .13);
 
+    --transition:
+        180ms ease;
 
-        <div id="unit-navigation">
+}
 
-            <!-- Generated automatically -->
 
-        </div>
+/* ==========================================================
+   RESET
+========================================================== */
 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        <div class="sidebar-bottom">
 
-            <div class="progress-mini">
+html {
+    scroll-behavior: smooth;
+}
 
-                <span>Course progress</span>
 
-                <strong id="course-progress-text">
-                    0%
-                </strong>
+body {
 
-                <div class="progress-track">
+    min-height: 100vh;
 
-                    <div
-                        id="course-progress-bar"
-                        class="progress-fill"
-                    ></div>
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 
-                </div>
+    color: var(--text);
 
-            </div>
+    background: var(--background);
 
-        </div>
+    -webkit-font-smoothing: antialiased;
 
-    </aside>
+}
 
 
+button,
+input,
+textarea {
+    font: inherit;
+}
 
-    <!-- =====================================================
-         MAIN AREA
-    ====================================================== -->
 
-    <main class="main">
+button {
+    cursor: pointer;
+}
 
 
-        <!-- TOP BAR -->
+button:disabled {
+    cursor: not-allowed;
+}
 
-        <header class="topbar">
 
-            <button
-                id="mobile-menu-btn"
-                class="icon-button"
-            >
-                ☰
-            </button>
+img {
+    max-width: 100%;
+}
 
 
-            <div>
+.hidden {
+    display: none !important;
+}
 
-                <div
-                    id="current-unit-label"
-                    class="topbar-small"
-                >
-                    Unit 1
-                </div>
 
-                <h1 id="current-lesson-title">
-                    Welcome
-                </h1>
+/* ==========================================================
+   APPLICATION
+========================================================== */
 
-            </div>
+#app {
+    min-height: 100vh;
+}
 
 
-            <div class="topbar-right">
+/* ==========================================================
+   SIDEBAR
+========================================================== */
 
-                <div class="lesson-progress">
+.sidebar {
 
-                    <span id="lesson-progress-text">
-                        0%
-                    </span>
+    position: fixed;
 
-                    <div class="lesson-progress-track">
+    inset:
+        0 auto 0 0;
 
-                        <div
-                            id="lesson-progress-bar"
-                            class="lesson-progress-fill"
-                        ></div>
+    width: var(--sidebar-width);
 
-                    </div>
+    background: var(--navy-900);
 
-                </div>
+    color: white;
 
-            </div>
+    display: flex;
 
-        </header>
+    flex-direction: column;
 
+    z-index: 500;
 
+    overflow-y: auto;
 
-        <!-- =================================================
-             LESSON HOME
-        ================================================== -->
+    box-shadow:
+        5px 0 30px rgba(9, 20, 38, .08);
 
-        <section
-            id="lesson-home"
-            class="lesson-home"
-        >
+}
 
-            <div class="welcome-card">
 
-                <div class="welcome-icon">
-                    🎓
-                </div>
+.sidebar-brand {
 
-                <div>
+    min-height: 88px;
 
-                    <div class="eyebrow">
-                        AUTONOMOUS LESSON
-                    </div>
+    padding: 20px 22px;
 
-                    <h2 id="welcome-title">
-                        Welcome to your lesson
-                    </h2>
+    display: flex;
 
-                    <p id="welcome-description">
-                        Complete each activity in order.
-                        Your AI teacher will guide you through
-                        the lesson.
-                    </p>
+    align-items: center;
 
-                </div>
+    gap: 12px;
 
-            </div>
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.08);
 
+}
 
-            <!-- LESSON CARDS -->
 
-            <div
-                id="lesson-cards"
-                class="lesson-cards"
-            >
+.brand-mark {
 
-                <!-- Generated by JavaScript -->
+    width: 40px;
+    height: 40px;
 
-            </div>
+    border-radius: 11px;
 
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            var(--cyan)
+        );
 
-            <div class="lesson-start">
+    display: flex;
 
-                <button
-                    id="start-lesson-btn"
-                    class="primary-button"
-                >
-                    Start lesson
-                    <span>→</span>
-                </button>
+    align-items: center;
+    justify-content: center;
 
-            </div>
+    font-size: 13px;
 
-        </section>
+    font-weight: 800;
 
+    letter-spacing: -.5px;
 
+}
 
-        <!-- =================================================
-             ACTIVITY AREA
-        ================================================== -->
 
-        <section
-            id="activity-area"
-            class="activity-area hidden"
-        >
+.brand-text {
 
-            <div class="activity-header">
+    display: flex;
 
-                <button
-                    id="back-to-lesson"
-                    class="back-button"
-                >
-                    ← Lesson overview
-                </button>
+    flex-direction: column;
 
-                <div
-                    id="activity-type"
-                    class="activity-type"
-                >
-                    EXPLANATION
-                </div>
+    min-width: 0;
 
-            </div>
+}
 
 
-            <div
-                id="activity-content"
-                class="activity-content"
-            >
+.brand-text strong {
 
-                <!-- Activity generated here -->
+    font-size: 14px;
 
-            </div>
+    line-height: 1.2;
 
+}
 
-            <!-- ACTIVITY NAVIGATION -->
 
-            <div class="activity-navigation">
+.brand-text span {
 
-                <button
-                    id="previous-activity"
-                    class="secondary-button"
-                >
-                    ← Previous
-                </button>
+    color:
+        rgba(255,255,255,.52);
 
+    font-size: 10px;
 
-                <div
-                    id="activity-counter"
-                    class="activity-counter"
-                >
-                    1 / 8
-                </div>
+    margin-top: 3px;
 
+}
 
-                <button
-                    id="next-activity"
-                    class="primary-button"
-                >
-                    Continue →
-                </button>
 
-            </div>
+.mobile-close {
 
-        </section>
+    display: none;
 
+}
 
 
-        <!-- =================================================
-             COMPLETION SCREEN
-        ================================================== -->
+/* ==========================================================
+   SIDEBAR NAV
+========================================================== */
 
-        <section
-            id="completion-screen"
-            class="completion-screen hidden"
-        >
+.sidebar-section-label {
 
-            <div class="completion-card">
+    padding:
+        28px
+        22px
+        10px;
 
-                <div class="completion-icon">
-                    🏆
-                </div>
+    font-size: 10px;
 
-                <div class="eyebrow">
-                    LESSON COMPLETE
-                </div>
+    letter-spacing: 1.4px;
 
-                <h2>
-                    Excellent work!
-                </h2>
+    font-weight: 800;
 
-                <p>
-                    You have completed this lesson.
-                </p>
+    color:
+        rgba(255,255,255,.38);
 
+}
 
-                <div class="score-circle">
 
-                    <strong id="final-score">
-                        0%
-                    </strong>
+.course-navigation {
 
-                    <span>
-                        score
-                    </span>
+    padding:
+        0 12px;
 
-                </div>
+}
 
 
-                <div class="completion-actions">
+.unit-navigation-item {
 
-                    <button
-                        id="review-lesson-btn"
-                        class="secondary-button"
-                    >
-                        Review lesson
-                    </button>
+    margin-bottom: 4px;
 
-                    <button
-                        id="next-lesson-btn"
-                        class="primary-button"
-                    >
-                        Next lesson →
-                    </button>
+}
 
-                </div>
 
-            </div>
+.unit-button {
 
-        </section>
+    width: 100%;
 
-    </main>
+    border: 0;
 
-</div>
+    background: transparent;
 
+    color:
+        rgba(255,255,255,.78);
 
+    padding: 12px;
 
-<!-- =========================================================
-     AI SPEAKING MODAL
-========================================================= -->
+    border-radius: 9px;
 
-<div
-    id="speaking-modal"
-    class="modal hidden"
->
+    display: flex;
 
-    <div class="modal-card speaking-card">
+    justify-content: space-between;
 
-        <button
-            id="close-speaking"
-            class="modal-close"
-        >
-            ×
-        </button>
+    align-items: center;
 
+    font-size: 13px;
 
-        <div class="ai-avatar">
-            🤖
-        </div>
+    font-weight: 700;
 
-        <div class="eyebrow">
-            AI SPEAKING PRACTICE
-        </div>
+    transition:
+        background var(--transition),
+        color var(--transition);
 
-        <h2 id="speaking-title">
-            Let's have a conversation
-        </h2>
+}
 
 
-        <div
-            id="ai-message"
-            class="ai-message"
-        >
-            Hello! Let's practise together.
-        </div>
+.unit-button:hover {
 
+    background:
+        rgba(255,255,255,.07);
 
-        <div class="speaking-status">
+    color: white;
 
-            <div
-                id="speaking-indicator"
-                class="speaking-indicator"
-            ></div>
+}
 
-            <span id="speaking-status-text">
-                Press the microphone and speak.
-            </span>
 
-        </div>
+.unit-navigation-item.open
+.unit-button {
 
+    background:
+        rgba(255,255,255,.09);
 
-        <button
-            id="microphone-button"
-            class="microphone-button"
-        >
-            🎙️
-        </button>
+    color: white;
 
+}
 
-        <div
-            id="student-transcript"
-            class="student-transcript"
-        ></div>
 
+.unit-arrow {
 
-        <button
-            id="speaking-submit"
-            class="primary-button speaking-submit"
-        >
-            Finish response
-        </button>
+    transition:
+        transform var(--transition);
 
-    </div>
+}
 
-</div>
 
+.unit-navigation-item.open
+.unit-arrow {
 
+    transform:
+        rotate(90deg);
 
-<!-- =========================================================
-     MEDIA MODAL
-========================================================= -->
+}
 
-<div
-    id="media-modal"
-    class="modal hidden"
->
 
-    <div class="modal-card media-card">
+.unit-lessons {
 
-        <button
-            id="close-media"
-            class="modal-close"
-        >
-            ×
-        </button>
+    display: none;
 
-        <div id="media-content"></div>
+    padding:
+        3px
+        0
+        7px
+        11px;
 
-    </div>
+}
 
-</div>
 
+.unit-navigation-item.open
+.unit-lessons {
 
+    display: block;
 
-<script src="js/script.js"></script>
+}
 
-</body>
 
-</html>
+.lesson-nav-button {
+
+    width: 100%;
+
+    border: 0;
+
+    background: transparent;
+
+    color:
+        rgba(255,255,255,.52);
+
+    padding:
+        9px
+        12px;
+
+    border-radius: 7px;
+
+    text-align: left;
+
+    font-size: 12px;
+
+    transition:
+        color var(--transition),
+        background var(--transition);
+
+}
+
+
+.lesson-nav-button:hover {
+
+    color: white;
+
+    background:
+        rgba(255,255,255,.05);
+
+}
+
+
+.lesson-nav-button.active {
+
+    color: white;
+
+    background:
+        rgba(47,111,237,.24);
+
+}
+
+
+/* ==========================================================
+   SIDEBAR FOOTER
+========================================================== */
+
+.sidebar-footer {
+
+    margin-top: auto;
+
+    padding:
+        20px 20px 24px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.08);
+
+}
+
+
+.sidebar-progress-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    font-size: 11px;
+
+    color:
+        rgba(255,255,255,.55);
+
+}
+
+
+.sidebar-progress-header strong {
+
+    color: white;
+
+}
+
+
+.progress-track {
+
+    width: 100%;
+
+    height: 5px;
+
+    background:
+        rgba(255,255,255,.10);
+
+    border-radius: 999px;
+
+    overflow: hidden;
+
+    margin-top: 9px;
+
+}
+
+
+.progress-fill {
+
+    width: 0%;
+
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            var(--cyan)
+        );
+
+    border-radius: 999px;
+
+    transition:
+        width .4s ease;
+
+}
+
+
+.sidebar-footer p {
+
+    color:
+        rgba(255,255,255,.35);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
+    margin-top: 10px;
+
+}
+
+
+/* ==========================================================
+   MAIN
+========================================================== */
+
+.main {
+
+    margin-left: var(--sidebar-width);
+
+    min-height: 100vh;
+
+}
+
+
+/* ==========================================================
+   TOPBAR
+========================================================== */
+
+.topbar {
+
+    height: 78px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    background:
+        rgba(255,255,255,.94);
+
+    border-bottom:
+        1px solid var(--border);
+
+    backdrop-filter:
+        blur(14px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 38px;
+
+}
+
+
+.topbar-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+}
+
+
+.breadcrumb {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    font-size: 12px;
+
+    color: var(--text-muted);
+
+}
+
+
+.breadcrumb strong {
+
+    color: var(--text);
+
+    font-weight: 700;
+
+}
+
+
+.breadcrumb-divider {
+
+    color: #c5ccd8;
+
+}
+
+
+.top-progress {
+
+    width: 190px;
+
+}
+
+
+.top-progress-label {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 6px;
+
+    font-size: 10px;
+
+    color: var(--text-muted);
+
+}
+
+
+.top-progress-label strong {
+
+    color: var(--blue);
+
+}
+
+
+.top-progress-track {
+
+    height: 5px;
+
+    background: #e9edf3;
+
+    border-radius: 999px;
+
+    overflow: hidden;
+
+}
+
+
+.top-progress-fill {
+
+    width: 0%;
+
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            var(--cyan)
+        );
+
+    border-radius: 999px;
+
+    transition:
+        width .4s ease;
+
+}
+
+
+.mobile-menu-button {
+
+    display: none;
+
+}
+
+
+/* ==========================================================
+   PAGE
+========================================================== */
+
+.page {
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   LESSON HOME
+========================================================== */
+
+.lesson-home {
+
+    width: min(
+        1180px,
+        calc(100% - 70px)
+    );
+
+    margin: 0 auto;
+
+    padding:
+        42px
+        0
+        70px;
+
+}
+
+
+/* ==========================================================
+   HERO
+========================================================== */
+
+.lesson-hero {
+
+    min-height: 285px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    border-radius: var(--radius-xl);
+
+    background:
+        linear-gradient(
+            120deg,
+            var(--navy-950),
+            var(--navy-900) 55%,
+            var(--navy-800)
+        );
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        45px 55px;
+
+    box-shadow: var(--shadow);
+
+}
+
+
+.hero-content {
+
+    position: relative;
+
+    z-index: 3;
+
+    max-width: 650px;
+
+}
+
+
+.hero-label {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+    color:
+        rgba(255,255,255,.50);
+
+    margin-bottom: 12px;
+
+}
+
+
+.hero-content h1 {
+
+    font-size:
+        clamp(
+            30px,
+            4vw,
+            45px
+        );
+
+    letter-spacing: -.9px;
+
+    line-height: 1.05;
+
+    margin-bottom: 15px;
+
+}
+
+
+.hero-content p {
+
+    max-width: 610px;
+
+    color:
+        rgba(255,255,255,.68);
+
+    line-height: 1.65;
+
+    font-size: 14px;
+
+}
+
+
+.hero-meta {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 22px;
+
+    margin-top: 28px;
+
+}
+
+
+.meta-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color:
+        rgba(255,255,255,.62);
+
+    font-size: 11px;
+
+}
+
+
+.meta-icon {
+
+    color:
+        var(--cyan);
+
+    font-weight: 800;
+
+}
+
+
+.hero-visual {
+
+    width: 260px;
+
+    height: 210px;
+
+    position: relative;
+
+    flex-shrink: 0;
+
+}
+
+
+.hero-circle {
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(66,185,216,.18);
+
+}
+
+
+.circle-one {
+
+    width: 260px;
+    height: 260px;
+
+    top: -20px;
+    right: -20px;
+
+}
+
+
+.circle-two {
+
+    width: 180px;
+    height: 180px;
+
+    top: 20px;
+    right: 20px;
+
+}
+
+
+.hero-card {
+
+    position: absolute;
+
+    width: 155px;
+
+    padding: 22px;
+
+    border-radius: 16px;
+
+    background:
+        rgba(255,255,255,.09);
+
+    border:
+        1px solid
+        rgba(255,255,255,.13);
+
+    backdrop-filter:
+        blur(15px);
+
+    top: 45px;
+    right: 45px;
+
+}
+
+
+.hero-card-small {
+
+    display: block;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+
+    color:
+        rgba(255,255,255,.45);
+
+    margin-bottom: 7px;
+
+}
+
+
+.hero-card strong {
+
+    font-size: 34px;
+
+    letter-spacing: -1px;
+
+}
+
+
+.hero-mini-track {
+
+    height: 4px;
+
+    background:
+        rgba(255,255,255,.13);
+
+    margin-top: 12px;
+
+    border-radius: 999px;
+
+    overflow: hidden;
+
+}
+
+
+.hero-mini-track div {
+
+    width: 0%;
+
+    height: 100%;
+
+    background: var(--cyan);
+
+    border-radius: 999px;
+
+    transition:
+        width .4s ease;
+
+}
+
+
+/* ==========================================================
+   CONTENT HEADING
+========================================================== */
+
+.content-heading {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    margin:
+        43px
+        0
+        20px;
+
+}
+
+
+.section-label {
+
+    display: block;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+
+    color: var(--blue);
+
+    margin-bottom: 6px;
+
+}
+
+
+.content-heading h2 {
+
+    font-size: 23px;
+
+    letter-spacing: -.3px;
+
+}
+
+
+.status-badge {
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    padding:
+        7px
+        11px;
+
+    border-radius: 999px;
+
+    background: #edf0f5;
+
+    color: var(--text-soft);
+
+}
+
+
+.status-badge.complete {
+
+    background:
+        var(--green-light);
+
+    color:
+        var(--green);
+
+}
+
+
+/* ==========================================================
+   LESSON CARDS
+========================================================== */
+
+.lesson-cards {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0,1fr)
+        );
+
+    gap: 15px;
+
+}
+
+
+.lesson-card {
+
+    position: relative;
+
+    min-height: 205px;
+
+    background: white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 23px;
+
+    cursor: pointer;
+
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        border-color var(--transition);
+
+}
+
+
+.lesson-card:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow: var(--shadow);
+
+    border-color:
+        #cbd5e5;
+
+}
+
+
+.lesson-card.completed {
+
+    border-color:
+        #bce5d0;
+
+}
+
+
+.card-number {
+
+    position: absolute;
+
+    right: 19px;
+    top: 18px;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    color: #b5bfce;
+
+}
+
+
+.card-icon {
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background:
+        var(--blue-light);
+
+    color:
+        var(--blue);
+
+    font-size: 18px;
+
+    margin-bottom: 18px;
+
+}
+
+
+.lesson-card h3 {
+
+    font-size: 15px;
+
+    margin-bottom: 7px;
+
+}
+
+
+.lesson-card p {
+
+    color: var(--text-soft);
+
+    font-size: 12px;
+
+    line-height: 1.55;
+
+    max-width: 250px;
+
+}
+
+
+.card-status {
+
+    margin-top: 15px;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+}
+
+
+.card-status.complete {
+
+    color: var(--green);
+
+}
+
+
+/* ==========================================================
+   LESSON ACTION
+========================================================== */
+
+.lesson-action {
+
+    margin-top: 23px;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+}
+
+
+/* ==========================================================
+   BUTTONS
+========================================================== */
+
+.primary-button,
+.secondary-button {
+
+    border: 0;
+
+    min-height: 42px;
+
+    padding:
+        0 17px;
+
+    border-radius: 9px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+
+    font-size: 12px;
+
+    font-weight: 750;
+
+    transition:
+        transform var(--transition),
+        background var(--transition),
+        box-shadow var(--transition);
+
+}
+
+
+.primary-button {
+
+    color: white;
+
+    background:
+        var(--blue);
+
+    box-shadow:
+        0 5px 15px
+        rgba(47,111,237,.20);
+
+}
+
+
+.primary-button:hover {
+
+    background:
+        var(--blue-dark);
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(47,111,237,.26);
+
+}
+
+
+.secondary-button {
+
+    color: var(--text);
+
+    background: white;
+
+    border:
+        1px solid var(--border);
+
+}
+
+
+.secondary-button:hover {
+
+    background:
+        #f7f9fc;
+
+}
+
+
+.large-button {
+
+    min-height: 48px;
+
+    padding:
+        0 21px;
+
+}
+
+
+.button-arrow {
+
+    font-size: 17px;
+
+}
+
+
+/* ==========================================================
+   ACTIVITY
+========================================================== */
+
+.activity-area {
+
+    width: min(
+        900px,
+        calc(100% - 60px)
+    );
+
+    margin: 0 auto;
+
+    padding:
+        35px
+        0
+        60px;
+
+}
+
+
+.activity-top {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 18px;
+
+}
+
+
+.back-button {
+
+    border: 0;
+
+    background: transparent;
+
+    color: var(--text-soft);
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    display: flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+}
+
+
+.back-button:hover {
+
+    color: var(--blue);
+
+}
+
+
+.activity-type {
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+
+    padding:
+        7px 10px;
+
+    border-radius: 999px;
+
+    background:
+        var(--blue-light);
+
+    color:
+        var(--blue);
+
+}
+
+
+/* ==========================================================
+   ACTIVITY CONTENT
+========================================================== */
+
+.activity-content {
+
+    min-height: 430px;
+
+    background: white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--radius-lg);
+
+    padding:
+        40px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+}
+
+
+/* ==========================================================
+   EXPLANATION
+========================================================== */
+
+.explanation-content h2 {
+
+    font-size: 29px;
+
+    letter-spacing: -.5px;
+
+    margin-bottom: 9px;
+
+}
+
+
+.explanation-content > p {
+
+    color: var(--text-soft);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+    margin-bottom: 27px;
+
+}
+
+
+.explanation-text {
+
+    font-size: 16px;
+
+    line-height: 1.85;
+
+    color:
+        #344158;
+
+}
+
+
+.ai-teacher-video {
+
+    width: 100%;
+
+    max-height: 480px;
+
+    border-radius: 13px;
+
+    background: #07101f;
+
+    margin:
+        10px 0
+        27px;
+
+}
+
+
+/* ==========================================================
+   QUESTION
+========================================================== */
+
+.question {
+
+    font-size: 22px;
+
+    font-weight: 750;
+
+    line-height: 1.45;
+
+    margin-bottom: 23px;
+
+}
+
+
+.options {
+
+    display: grid;
+
+    gap: 10px;
+
+}
+
+
+.option {
+
+    width: 100%;
+
+    border:
+        1px solid var(--border);
+
+    background: white;
+
+    color: var(--text);
+
+    border-radius: 10px;
+
+    padding:
+        15px 16px;
+
+    text-align: left;
+
+    font-size: 13px;
+
+    transition:
+        border-color var(--transition),
+        background var(--transition);
+
+}
+
+
+.option:hover {
+
+    border-color:
+        var(--blue);
+
+    background:
+        var(--blue-light);
+
+}
+
+
+.option.correct {
+
+    border-color:
+        var(--green);
+
+    background:
+        var(--green-light);
+
+}
+
+
+.option.incorrect {
+
+    border-color:
+        var(--red);
+
+    background:
+        var(--red-light);
+
+}
+
+
+/* ==========================================================
+   FEEDBACK
+========================================================== */
+
+.feedback {
+
+    margin-top: 20px;
+
+    padding:
+        15px;
+
+    border-radius: 10px;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+}
+
+
+.feedback.correct {
+
+    background:
+        var(--green-light);
+
+    color:
+        #16764b;
+
+}
+
+
+.feedback.incorrect {
+
+    background:
+        var(--red-light);
+
+    color:
+        #a6323d;
+
+}
+
+
+/* ==========================================================
+   TEXT INPUT
+========================================================== */
+
+.text-answer {
+
+    width: 100%;
+
+    border:
+        1px solid var(--border);
+
+    background:
+        #fbfcfe;
+
+    border-radius: 10px;
+
+    padding:
+        15px;
+
+    font-size: 15px;
+
+    outline: none;
+
+    color: var(--text);
+
+}
+
+
+.text-answer:focus {
+
+    border-color:
+        var(--blue);
+
+    background: white;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(47,111,237,.08);
+
+}
+
+
+/* ==========================================================
+   ACTIVITY NAVIGATION
+========================================================== */
+
+.activity-navigation {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        auto
+        1fr;
+
+    align-items: center;
+
+    margin-top: 16px;
+
+    gap: 15px;
+
+}
+
+
+.activity-navigation >
+#next-activity {
+
+    justify-self: end;
+
+}
+
+
+.activity-position {
+
+    text-align: center;
+
+}
+
+
+.activity-position span {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    color: var(--text-muted);
+
+}
+
+
+.activity-dots {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    margin-top: 7px;
+
+}
+
+
+.activity-dot {
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #dce2eb;
+
+}
+
+
+.activity-dot.active {
+
+    width: 16px;
+
+    border-radius: 99px;
+
+    background:
+        var(--blue);
+
+}
+
+
+/* ==========================================================
+   COMPLETION
+======
