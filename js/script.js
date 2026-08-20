@@ -1,1579 +1,2384 @@
-const slideImage = document.getElementById("slide-image");
-const slideContainer = document.querySelector(".slide-container");
-const homeBtn = document.getElementById("home-btn");
-const prevBtn = document.getElementById("prev-btn");
-const nextBtn = document.getElementById("next-btn");
-document.addEventListener("DOMContentLoaded", () => {
-    });
-const studentDropdownLinks = document.querySelectorAll(
-    "#students-book-dropdown .unit-item > a"
-);
-const activityDropdownLinks = document.querySelectorAll("#activity-book-dropdown a");
-const dropdownBtns = document.querySelectorAll(".dropdown-btn");
+/* ==========================================================
+   ACADEMIA POLIGLOTA
+   AUTONOMOUS COURSE ENGINE
+========================================================== */
 
-const audioBtn = document.getElementById("audio-btn");
-const audioListContainer = document.getElementById("audio-list-container");
-const audioPlayer = document.getElementById("slide-audio");
-const audioSource = document.getElementById("audio-source");
-const hideAudioBtn = document.getElementById("hide-audio-btn");
 
-// Show audio player and hide button
-function showAudioPlayer() {
-    audioPlayer.style.display = "block";
-    hideAudioBtn.style.display = "inline-block";
+/* ==========================================================
+   COURSE CONTENT
+==========================================================
+
+   THIS IS THE MAIN AREA YOU WILL EDIT.
+
+   The engine below handles:
+
+   - lesson cards
+   - explanations
+   - videos
+   - audio
+   - multiple choice
+   - written exercises
+   - fill in the blanks
+   - speaking
+   - automatic correction
+   - scoring
+   - progress
+   - lesson completion
+   - saved progress
+
+========================================================== */
+
+
+const COURSE_DATA = {
+
+    title: "English Course",
+
+    units: [
+
+        {
+            id: 1,
+
+            title: "Unit 1",
+
+            lessons: [
+
+                {
+                    id: 1,
+
+                    title: "Getting Started",
+
+                    description:
+                        "Learn the key language and practise the first concepts.",
+
+                    activities: [
+
+                        /* ======================================
+                           EXPLANATION
+                        ====================================== */
+
+                        {
+                            id: "welcome",
+
+                            type: "explanation",
+
+                            title: "Welcome to the lesson",
+
+                            icon: "👋",
+
+                            description:
+                                "Your AI teacher introduces today's lesson.",
+
+                            text:
+                                "Welcome! In this lesson you will learn the key language you need to introduce yourself and talk about basic personal information.",
+
+                            video: "",
+
+                            duration: "5–10 min"
+                        },
+
+
+                        /* ======================================
+                           VOCABULARY
+                        ====================================== */
+
+                        {
+                            id: "vocabulary",
+
+                            type: "explanation",
+
+                            title: "Key vocabulary",
+
+                            icon: "📚",
+
+                            description:
+                                "Learn the vocabulary you will use in this lesson.",
+
+                            text:
+                                "Here you will provide the vocabulary explanation for the lesson. You can later add images, examples, audio and an AI teacher video.",
+
+                            video: "",
+
+                            audio: "",
+
+                            duration: "5 min"
+                        },
+
+
+                        /* ======================================
+                           MULTIPLE CHOICE
+                        ====================================== */
+
+                        {
+                            id: "exercise-1",
+
+                            type: "multiple-choice",
+
+                            title: "Choose the correct answer",
+
+                            icon: "✏️",
+
+                            description:
+                                "Check your understanding.",
+
+                            question:
+                                "She ___ from Angola.",
+
+                            options: [
+
+                                "am",
+
+                                "is",
+
+                                "are"
+
+                            ],
+
+                            answer: 1,
+
+                            explanation:
+                                "We use 'is' with he, she and it."
+
+                        },
+
+
+                        /* ======================================
+                           FILL IN THE BLANK
+                        ====================================== */
+
+                        {
+                            id: "exercise-2",
+
+                            type: "text",
+
+                            title: "Complete the sentence",
+
+                            icon: "🧠",
+
+                            description:
+                                "Type the missing word.",
+
+                            question:
+                                "My name ___ Paulo.",
+
+                            answer:
+                                "is",
+
+                            explanation:
+                                "The correct sentence is: My name is Paulo."
+
+                        },
+
+
+                        /* ======================================
+                           LISTENING
+                        ====================================== */
+
+                        {
+                            id: "listening",
+
+                            type: "listening",
+
+                            title: "Listening practice",
+
+                            icon: "🎧",
+
+                            description:
+                                "Listen carefully and answer the question.",
+
+                            audio:
+                                "",
+
+                            question:
+                                "What is the speaker's name?",
+
+                            options: [
+
+                                "John",
+
+                                "Michael",
+
+                                "Peter"
+
+                            ],
+
+                            answer: 0,
+
+                            explanation:
+                                "The speaker says that his name is John."
+
+                        },
+
+
+                        /* ======================================
+                           SPEAKING
+                        ====================================== */
+
+                        {
+                            id: "speaking",
+
+                            type: "speaking",
+
+                            title: "Speaking practice",
+
+                            icon: "🗣️",
+
+                            description:
+                                "Have a conversation with your AI teacher.",
+
+                            aiOpening:
+                                "Hello! My name is Alex. What's your name?",
+
+                            instructions:
+                                "Introduce yourself and tell me your name, where you are from and what you do."
+
+                        },
+
+
+                        /* ======================================
+                           REVIEW
+                        ====================================== */
+
+                        {
+                            id: "review",
+
+                            type: "multiple-choice",
+
+                            title: "Lesson review",
+
+                            icon: "🏆",
+
+                            description:
+                                "Final check before completing the lesson.",
+
+                            question:
+                                "Which sentence is correct?",
+
+                            options: [
+
+                                "I are from Angola.",
+
+                                "I am from Angola.",
+
+                                "I is from Angola."
+
+                            ],
+
+                            answer: 1,
+
+                            explanation:
+                                "The correct sentence is 'I am from Angola.'"
+
+                        }
+
+                    ]
+
+                }
+
+            ]
+
+        }
+
+    ]
+
+};
+
+
+/* ==========================================================
+   APPLICATION STATE
+========================================================== */
+
+let currentUnit = 0;
+let currentLesson = 0;
+let currentActivity = 0;
+
+let lessonScore = 0;
+let answeredActivities = {};
+
+let recognition = null;
+let isRecording = false;
+
+
+/* ==========================================================
+   DOM
+========================================================== */
+
+const unitNavigation =
+    document.getElementById("unit-navigation");
+
+const lessonCards =
+    document.getElementById("lesson-cards");
+
+const lessonHome =
+    document.getElementById("lesson-home");
+
+const activityArea =
+    document.getElementById("activity-area");
+
+const activityContent =
+    document.getElementById("activity-content");
+
+const completionScreen =
+    document.getElementById("completion-screen");
+
+const currentUnitLabel =
+    document.getElementById("current-unit-label");
+
+const currentLessonTitle =
+    document.getElementById("current-lesson-title");
+
+const welcomeTitle =
+    document.getElementById("welcome-title");
+
+const welcomeDescription =
+    document.getElementById("welcome-description");
+
+const lessonProgressText =
+    document.getElementById("lesson-progress-text");
+
+const lessonProgressBar =
+    document.getElementById("lesson-progress-bar");
+
+const activityType =
+    document.getElementById("activity-type");
+
+const activityCounter =
+    document.getElementById("activity-counter");
+
+const previousActivity =
+    document.getElementById("previous-activity");
+
+const nextActivity =
+    document.getElementById("next-activity");
+
+const finalScore =
+    document.getElementById("final-score");
+
+const courseProgressText =
+    document.getElementById("course-progress-text");
+
+const courseProgressBar =
+    document.getElementById("course-progress-bar");
+
+
+/* ==========================================================
+   STORAGE
+========================================================== */
+
+const STORAGE_KEY =
+    "academiaPoliglotaAutonomousCourse";
+
+
+function getProgress() {
+
+    try {
+
+        return JSON.parse(
+            localStorage.getItem(STORAGE_KEY)
+        ) || {};
+
+    } catch {
+
+        return {};
+
+    }
+
 }
 
-// Hide audio player when hide button is clicked
-hideAudioBtn.addEventListener("click", () => {
-    audioPlayer.style.display = "none";
-    hideAudioBtn.style.display = "none";
-});
-let currentImages = [];
-let currentIndex = 0;
-let currentScale = 1;
 
-// ==========================
-// SAVE CURRENT PAGE STATE
-// ==========================
-function saveCurrentState(bookType, unit, pageNum) {
-    localStorage.setItem("pptkb1State", JSON.stringify({ bookType, unit, pageNum }));
+function saveProgress() {
+
+    const progress = getProgress();
+
+    const unit =
+        COURSE_DATA.units[currentUnit];
+
+    const lesson =
+        unit.lessons[currentLesson];
+
+    progress[
+        `${unit.id}_${lesson.id}`
+    ] = {
+
+        completed:
+            Object.keys(answeredActivities).length ===
+            lesson.activities.length,
+
+        score:
+            lessonScore,
+
+        answered:
+            answeredActivities
+
+    };
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(progress)
+    );
+
+    updateCourseProgress();
 }
-// ==========================
-// DROPDOWN TOGGLE
-// ==========================
-dropdownBtns.forEach(btn => {
-    btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const parentDropdown = btn.parentElement;
-        document.querySelectorAll('.dropdown').forEach(d => {
-            if(d !== parentDropdown) d.classList.remove('show');
-        });
-        parentDropdown.classList.toggle('show');
-    });
-});
 
-window.addEventListener("click", (e) => {
+
+/* ==========================================================
+   COURSE NAVIGATION
+========================================================== */
+
+function renderUnitNavigation() {
+
+    unitNavigation.innerHTML = "";
+
+    COURSE_DATA.units.forEach(
+        (unit, unitIndex) => {
+
+            const wrapper =
+                document.createElement("div");
+
+            wrapper.className =
+                "unit-navigation-item";
+
+
+            const button =
+                document.createElement("button");
+
+            button.className =
+                "unit-button";
+
+            button.innerHTML = `
+                <span>${unit.title}</span>
+                <span>›</span>
+            `;
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    wrapper.classList.toggle(
+                        "open"
+                    );
+
+                }
+            );
+
+
+            const lessonList =
+                document.createElement("div");
+
+            lessonList.className =
+                "unit-lessons";
+
+
+            unit.lessons.forEach(
+                (lesson, lessonIndex) => {
+
+                    const lessonButton =
+                        document.createElement("button");
+
+                    lessonButton.className =
+                        "lesson-nav-button";
+
+                    lessonButton.textContent =
+                        `Lesson ${lesson.id} — ${lesson.title}`;
+
+
+                    lessonButton.addEventListener(
+                        "click",
+                        () => {
+
+                            openLesson(
+                                unitIndex,
+                                lessonIndex
+                            );
+
+                        }
+                    );
+
+
+                    lessonList.appendChild(
+                        lessonButton
+                    );
+
+                }
+            );
+
+
+            wrapper.appendChild(button);
+            wrapper.appendChild(lessonList);
+
+            unitNavigation.appendChild(wrapper);
+
+        }
+    );
+
+}
+
+
+/* ==========================================================
+   OPEN LESSON
+========================================================== */
+
+function openLesson(unitIndex, lessonIndex) {
+
+    currentUnit = unitIndex;
+
+    currentLesson = lessonIndex;
+
+    currentActivity = 0;
+
+    lessonScore = 0;
+
+    answeredActivities = {};
+
+
+    const unit =
+        COURSE_DATA.units[currentUnit];
+
+    const lesson =
+        unit.lessons[currentLesson];
+
+
+    const saved =
+        getProgress()[
+            `${unit.id}_${lesson.id}`
+        ];
+
+
+    if (saved) {
+
+        lessonScore =
+            saved.score || 0;
+
+        answeredActivities =
+            saved.answered || {};
+
+    }
+
+
+    currentUnitLabel.textContent =
+        unit.title;
+
+    currentLessonTitle.textContent =
+        lesson.title;
+
+    welcomeTitle.textContent =
+        lesson.title;
+
+    welcomeDescription.textContent =
+        lesson.description;
+
+
+    renderLessonCards();
+
+    updateLessonProgress();
+
+    showLessonHome();
+
+}
+
+
+/* ==========================================================
+   LESSON CARDS
+========================================================== */
+
+function renderLessonCards() {
+
+    lessonCards.innerHTML = "";
+
+    const lesson =
+        COURSE_DATA.units[currentUnit]
+        .lessons[currentLesson];
+
+
+    lesson.activities.forEach(
+        (activity, index) => {
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "lesson-card";
+
+
+            const completed =
+                answeredActivities[
+                    activity.id
+                ];
+
+
+            if (completed) {
+
+                card.classList.add(
+                    "completed"
+                );
+
+            }
+
+
+            card.innerHTML = `
+
+                <div class="card-number">
+                    ${String(index + 1).padStart(2, "0")}
+                </div>
+
+                <div class="card-icon">
+                    ${activity.icon || getActivityIcon(activity.type)}
+                </div>
+
+                <h3>
+                    ${activity.title}
+                </h3>
+
+                <p>
+                    ${activity.description || ""}
+                </p>
+
+                ${
+                    completed
+                    ?
+                    `<div class="card-status complete">
+                        ✓ Complete
+                    </div>`
+                    :
+                    ""
+                }
+
+            `;
+
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    openActivity(index);
+
+                }
+            );
+
+
+            lessonCards.appendChild(card);
+
+        }
+    );
+
+}
+
+
+/* ==========================================================
+   ACTIVITY ICONS
+========================================================== */
+
+function getActivityIcon(type) {
+
+    const icons = {
+
+        explanation: "🎓",
+
+        "multiple-choice": "✏️",
+
+        text: "⌨️",
+
+        listening: "🎧",
+
+        speaking: "🗣️",
+
+        video: "🎬",
+
+        audio: "🔊"
+
+    };
+
+    return icons[type] || "📘";
+
+}
+
+
+/* ==========================================================
+   SHOW LESSON HOME
+========================================================== */
+
+function showLessonHome() {
+
+    lessonHome.classList.remove(
+        "hidden"
+    );
+
+    activityArea.classList.add(
+        "hidden"
+    );
+
+    completionScreen.classList.add(
+        "hidden"
+    );
+
+}
+
+
+/* ==========================================================
+   OPEN ACTIVITY
+========================================================== */
+
+function openActivity(index) {
+
+    const lesson =
+        COURSE_DATA.units[currentUnit]
+        .lessons[currentLesson];
+
 
     if (
-        e.target.closest(".dropdown") ||
-        e.target.closest(".lesson-dropdown")
+        index < 0 ||
+        index >= lesson.activities.length
     ) {
+
         return;
+
     }
 
-    document.querySelectorAll(".dropdown").forEach(d => {
-        d.classList.remove("show");
-    });
 
-    document.querySelectorAll(".lesson-dropdown").forEach(menu => {
-        menu.classList.remove("show");
-    });
+    currentActivity = index;
 
-});
 
-// ==========================
-// LOAD IMAGE FUNCTION
-// ==========================
-function autoFitImage() {
-    const containerWidth = slideContainer.clientWidth;
-    const containerHeight = slideContainer.clientHeight;
-    const imgWidth = slideImage.naturalWidth;
-    const imgHeight = slideImage.naturalHeight;
+    lessonHome.classList.add(
+        "hidden"
+    );
 
-    const scaleX = containerWidth / imgWidth;
-    const scaleY = containerHeight / imgHeight;
+    completionScreen.classList.add(
+        "hidden"
+    );
 
-    currentScale = Math.min(scaleX, scaleY);
+    activityArea.classList.remove(
+        "hidden"
+    );
 
-    slideImage.style.width = imgWidth * currentScale + "px";
-    slideImage.style.height = imgHeight * currentScale + "px";
-}
 
-function loadImage(src) {
+    renderActivity();
 
-    slideImage.style.display = "none";
-
-    slideImage.onload = function() {
-        slideImage.style.display = "block";
-        autoFitImage();
-        resizeEditCanvas();
-    };
-
-    slideImage.onerror = function() {
-        console.error("Failed to load image:", src);
-        slideImage.style.display = "none";
-    };
-
-    slideImage.src = src;
-}
-
-// ==========================
-// HOME PAGE
-// ==========================
-function loadHome() {
-    currentImages = [];
-    currentIndex = 0;
-    loadImage("images/homepage.jpg");
-    prevBtn.style.display = "none";
-    nextBtn.style.display = "none";
-}
-
-// ==========================
-// STUDENT BOOK
-// ==========================
-function loadStudentUnit(unitNumber) {
-    currentImages = [];
-    currentIndex = 0;
-
-    const folderName = "unit_" + unitNumber;
-    const basePath = `images/student-book-pages/${folderName}/`;
-
-    let pageNumbers = [];
-    switch(unitNumber) {
-        case "1": pageNumbers = [10,11,12,13,14,15,16,17,18]; break;
-        case "2": pageNumbers = [12,13,14,15,16,17]; break;
-        case "3": pageNumbers = [18,19,20,21,22,23,24,25]; break;
-        case "4": pageNumbers = [26,27,28,29,30,31]; break;
-        case "5": pageNumbers = [32,33,34,35,36,37]; break;
-        case "6": pageNumbers = [38,39,40,41,42,43,44,45]; break;
-        case "7": pageNumbers = [46,47,48,49,50,51]; break;
-        case "8": pageNumbers = [52,53,54,55,56,57]; break;
-        case "9": pageNumbers = [58,59,60,61,62,63,64,65]; break;
-        case "10": pageNumbers = [66,67,68,69,70,71]; break;
-        case "11": pageNumbers = [72,73,74,75,76,77]; break;
-        case "12": pageNumbers = [78,79,80,81,82,83,84,85]; break;
-        default: pageNumbers = []; break;
-    }
-
-    pageNumbers.forEach(num => {
-        currentImages.push(basePath + "page" + num + ".jpg");
-    });
-
-    loadImage(currentImages[currentIndex]);
-    prevBtn.style.display = "block";
-    nextBtn.style.display = "block";
-}
-
-// ==========================
-// ACTIVITY BOOK
-// ==========================
-function loadActivityUnit(unitNumber) {
-    currentImages = [];
-    currentIndex = 0;
-
-    const folderName = "unit_" + unitNumber;
-    const basePath = `images/activity-book-pages/${folderName}/`;
-
-    let pageNumbers = [];
-    switch(unitNumber) {
-        case "1": pageNumbers = [106,107]; break;
-        case "2": pageNumbers = [108,109]; break;
-        case "3": pageNumbers = [110,111]; break;
-        case "4": pageNumbers = [112,113]; break;
-        case "5": pageNumbers = [114,115]; break;
-        case "6": pageNumbers = [116,117]; break;
-        case "7": pageNumbers = [118,119]; break;
-        case "8": pageNumbers = [120,121]; break;
-        case "9": pageNumbers = [122,123]; break;
-        case "10": pageNumbers = [124,125]; break;
-        case "11": pageNumbers = [126,127]; break;
-        case "12": pageNumbers = [128,129]; break;
-        default: pageNumbers = []; break;
-    }
-
-    pageNumbers.forEach(num => {
-        currentImages.push(basePath + "page" + num + ".JPG");
-    });
-
-    if (currentImages.length > 1) {
-        prevBtn.style.display = "block";
-        nextBtn.style.display = "block";
-    } else {
-        prevBtn.style.display = "none";
-        nextBtn.style.display = "none";
-    }
-
-    loadImage(currentImages[currentIndex]);
 }
 
 
+/* ==========================================================
+   RENDER ACTIVITY
+========================================================== */
+
+function renderActivity() {
+
+    const lesson =
+        COURSE_DATA.units[currentUnit]
+        .lessons[currentLesson];
 
 
+    const activity =
+        lesson.activities[currentActivity];
 
 
-// ==========================
-// DROPDOWN EVENTS
-// ==========================
+    activityType.textContent =
+        activity.type
+            .replace("-", " ")
+            .toUpperCase();
 
-studentDropdownLinks.forEach(link => {
 
-    link.addEventListener("click", (e) => {
+    activityCounter.textContent =
+        `${currentActivity + 1} / ${lesson.activities.length}`;
 
-        e.preventDefault();
-        e.stopPropagation();
 
-        const unit = link.getAttribute("data-unit");
+    previousActivity.disabled =
+        currentActivity === 0;
 
-        // Find the lesson submenu belonging to this unit
-        const lessonMenu = link.parentElement.querySelector(".lesson-dropdown");
 
-        if (!lessonMenu) {
-            console.log("No lesson dropdown found for Unit " + unit);
-            return;
-        }
+    nextActivity.textContent =
+        currentActivity ===
+        lesson.activities.length - 1
+            ?
+            "Finish lesson"
+            :
+            "Continue →";
 
-        // Close other lesson menus
-        document.querySelectorAll(".lesson-dropdown").forEach(menu => {
-            if (menu !== lessonMenu) {
-                menu.classList.remove("show");
-            }
-        });
 
-        // Toggle this unit's lesson menu
-        lessonMenu.classList.toggle("show");
+    activityContent.innerHTML = "";
 
-    });
 
-});
-// ==========================
-// GET LESSON PAGES
-// ==========================
+    switch (activity.type) {
 
-function getLessonPages(unit, lesson) {
+        case "explanation":
 
-    const lessonMap = {
-
-        1: {
-            1: [ 6, 7],
-            2: [8, 9],
-            3: [10],
-            4: [11],
-            5: [106,107]
-        },
-
-        2: {
-            1: [12, 13],
-            2: [14,15],
-            3: [16],
-            4: [17],
-            5: [108,109]
-        },
-        3: {
-            1: [18, 19],
-            2: [20,21],
-            3: [22,23],
-            4: [24,25],
-            5: [110,111]
-        },
-       4: {
-            1: [26, 27],
-            2: [28,29],
-            3: [30],
-            4: [31],
-            5: [112,113]
-        },
-       5: {
-            1: [32,33],
-            2: [34,35],
-            3: [36],
-            4: [37],
-            5: [114,115]
-        },
-        6: {
-            1: [38,39],
-            2: [40,41],
-            3: [42,43],
-            4: [44,45],
-            5: [116,117]
-        }, 
-         7: {
-            1: [46,47],
-            2: [48,49],
-            3: [50],
-            4: [51],
-            5: [118,119]
-        },   
-          8: {
-            1: [52,53],
-            2: [54,55],
-            3: [56],
-            4: [57],
-            5: [120,121]
-        },   
-          9: {
-            1: [58,59],
-            2: [60,61],
-            3: [62,63],
-            4: [64,65],
-            5: [122,123]
-        },   
-          10: {
-            1: [66,67],
-            2: [68,69],
-            3: [70],
-            4: [71],
-            5: [124,125]
-        },   
-          11: {
-            1: [72,73],
-            2: [74,75],
-            3: [76],
-            4: [77],
-            5: [126,127]
-        },   
-          12: {
-            1: [78,79],
-            2: [80,81],
-            3: [82,83],
-            4: [84,85],
-            5: [128,129]
-        },     
-    };
-
-    return lessonMap[unit]?.[lesson] || [];
-}
-// ==========================
-// LESSON MENU
-// ==========================
-const lessonDropdownLinks = document.querySelectorAll(".lesson-dropdown a");
-
-lessonDropdownLinks.forEach(link => {
-
-    link.addEventListener("click", (e) => {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        const unit = link.getAttribute("data-unit");
-        const lesson = link.getAttribute("data-lesson");
-
-        console.log("Opening Unit:", unit, "Lesson:", lesson);
-
-        // ==========================
-        // NEW LESSON FOLDER PATH
-        // ==========================
-
-        const lessonPath =
-            `images/student-book-pages/unit_${unit}/lesson_${lesson}/`;
-
-        /*
-         * IMPORTANT:
-         * JavaScript cannot automatically discover the files
-         * inside a folder on Vercel/server hosting.
-         *
-         * Therefore, we define which pages belong to each lesson.
-         */
-
-        const lessonPages = getLessonPages(unit, lesson);
-
-        if (lessonPages.length === 0) {
-            console.warn(
-                `No pages found for Unit ${unit}, Lesson ${lesson}`
+            renderExplanation(
+                activity
             );
-            return;
-        }
 
-        // Build the NEW paths
-        currentImages = lessonPages.map(page =>
-            `${lessonPath}page${page}.jpg`
-        );
-
-        // Start at the FIRST page of the lesson
-        currentIndex = 0;
-
-        loadImage(currentImages[currentIndex]);
-
-        prevBtn.style.display = "block";
-        nextBtn.style.display = "block";
-
-        // Save current state
-        saveCurrentState(
-            "student",
-            unit,
-            lessonPages[0]
-        );
-
-        console.log(
-            "Opening:",
-            currentImages[currentIndex]
-        );
-
-        // Close lesson menus
-        document.querySelectorAll(".lesson-dropdown").forEach(menu => {
-            menu.classList.remove("show");
-        });
-
-    });
-
-});
+            break;
 
 
-activityDropdownLinks.forEach(link => {
-    link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const unit = link.getAttribute("data-unit");
-        loadActivityUnit(unit);
-        // Save state
-        saveCurrentState(
-            "activity",
-            unit,
-            parseInt(currentImages[currentIndex].match(/page(\d+)/)[1])
-        );
-    });
-});
+        case "multiple-choice":
 
-// ==========================
-// NAVIGATION
-// ==========================
-prevBtn.addEventListener("click", () => {
-    if (currentIndex > 0) {
-        currentIndex--;
-        loadImage(currentImages[currentIndex]);
-         // Save state
-        saveCurrentState(
-            currentImages[currentIndex].includes("student-book-pages") ? "student" : "activity",
-            currentImages[currentIndex].match(/unit_(\d+)/)[1],
-            currentImages[currentIndex].match(/page(\d+)/)[1]
-        );
-    }
-});
+            renderMultipleChoice(
+                activity
+            );
 
-nextBtn.addEventListener("click", () => {
-    if (currentIndex < currentImages.length - 1) {
-        currentIndex++;
-        loadImage(currentImages[currentIndex]);
-         // Save state
-        saveCurrentState(
-            currentImages[currentIndex].includes("student-book-pages") ? "student" : "activity",
-            currentImages[currentIndex].match(/unit_(\d+)/)[1],
-            currentImages[currentIndex].match(/page(\d+)/)[1]
-        );
-    }
-});
+            break;
 
-// ==========================
-// ZOOM SYSTEM
-// ==========================
 
-// Minimum and maximum zoom
-const MIN_ZOOM = 0.1;
-const MAX_ZOOM = 5;
+        case "text":
 
-// Apply zoom ONLY to the slide image
-function applyZoom() {
+            renderTextExercise(
+                activity
+            );
 
-    if (!slideImage.naturalWidth || !slideImage.naturalHeight) {
-        return;
+            break;
+
+
+        case "listening":
+
+            renderListening(
+                activity
+            );
+
+            break;
+
+
+        case "speaking":
+
+            renderSpeaking(
+                activity
+            );
+
+            break;
+
+
+        case "video":
+
+            renderVideo(
+                activity
+            );
+
+            break;
+
+
+        case "audio":
+
+            renderAudio(
+                activity
+            );
+
+            break;
+
+
+        default:
+
+            activityContent.innerHTML =
+                "<p>Activity type not configured.</p>";
+
     }
 
-    slideImage.style.width =
-        (slideImage.naturalWidth * currentScale) + "px";
 
-    slideImage.style.height =
-        (slideImage.naturalHeight * currentScale) + "px";
+    updateLessonProgress();
 
-    resizeEditCanvas();
 }
 
 
-// ==========================
-// COMPUTER — CTRL + MOUSE WHEEL
-// ==========================
+/* ==========================================================
+   EXPLANATION
+========================================================== */
 
-slideContainer.addEventListener("wheel", function(e) {
+function renderExplanation(activity) {
 
-    if (!e.ctrlKey) return;
+    const wrapper =
+        document.createElement("div");
 
-    e.preventDefault();
+    wrapper.className =
+        "explanation-content";
 
-    if (e.deltaY < 0) {
 
-        currentScale += 0.1;
+    wrapper.innerHTML = `
 
-    } else {
+        <div class="eyebrow">
+            AI TEACHER
+        </div>
 
-        currentScale -= 0.1;
+        <h2>
+            ${activity.title}
+        </h2>
+
+        <p>
+            ${activity.description || ""}
+        </p>
+
+    `;
+
+
+    if (activity.video) {
+
+        const video =
+            document.createElement("video");
+
+        video.className =
+            "ai-teacher-video";
+
+        video.controls = true;
+
+        video.src =
+            activity.video;
+
+        wrapper.appendChild(video);
+
     }
 
-    currentScale = Math.max(
-        MIN_ZOOM,
-        Math.min(MAX_ZOOM, currentScale)
+
+    if (activity.text) {
+
+        const text =
+            document.createElement("div");
+
+        text.className =
+            "explanation-text";
+
+        text.innerHTML =
+            activity.text;
+
+        wrapper.appendChild(text);
+
+    }
+
+
+    if (activity.audio) {
+
+        const audio =
+            document.createElement("audio");
+
+        audio.controls = true;
+
+        audio.src =
+            activity.audio;
+
+        audio.style.width =
+            "100%";
+
+        audio.style.marginTop =
+            "20px";
+
+        wrapper.appendChild(audio);
+
+    }
+
+
+    activityContent.appendChild(
+        wrapper
     );
 
-    applyZoom();
 
-}, { passive: false });
-
-
-// ==========================
-// ANDROID / TOUCH — PINCH ZOOM
-// ==========================
-
-let pinchStartDistance = null;
-let pinchStartScale = 1;
-
-
-// Calculate distance between two fingers
-function getTouchDistance(touch1, touch2) {
-
-    const dx = touch2.clientX - touch1.clientX;
-    const dy = touch2.clientY - touch1.clientY;
-
-    return Math.sqrt(
-        dx * dx + dy * dy
-    );
-}
-
-
-// Start pinch
-slideContainer.addEventListener("touchstart", function(e) {
-
-    if (e.touches.length !== 2) return;
-
-    e.preventDefault();
-
-    pinchStartDistance = getTouchDistance(
-        e.touches[0],
-        e.touches[1]
+    markActivityViewed(
+        activity.id
     );
 
-    // Remember the zoom level when the pinch begins
-    pinchStartScale = currentScale;
-
-}, { passive: false });
-
-
-// Continue pinch
-slideContainer.addEventListener("touchmove", function(e) {
-
-    if (e.touches.length !== 2) return;
-
-    e.preventDefault();
-
-    const currentDistance = getTouchDistance(
-        e.touches[0],
-        e.touches[1]
-    );
-
-    if (!pinchStartDistance) return;
-
-    // How much the fingers moved apart/together
-    const scaleChange =
-        currentDistance / pinchStartDistance;
-
-    // Calculate new zoom
-    currentScale =
-        pinchStartScale * scaleChange;
-
-    // Limit zoom
-    currentScale = Math.max(
-        MIN_ZOOM,
-        Math.min(MAX_ZOOM, currentScale)
-    );
-
-    applyZoom();
-
-}, { passive: false });
-
-
-// Finish pinch
-slideContainer.addEventListener("touchend", function(e) {
-
-    if (e.touches.length < 2) {
-
-        pinchStartDistance = null;
-
-        // currentScale is deliberately NOT reset
-        // The zoom remains exactly where the user left it.
-    }
-
-}, { passive: false });
-
-
-// Also handle cancelled touches
-slideContainer.addEventListener("touchcancel", function() {
-
-    pinchStartDistance = null;
-
-}, { passive: false });
-// ==========================
-// HOME BUTTON
-// ==========================
-homeBtn.addEventListener("click", function(e) {
-    e.preventDefault();
-    loadHome();
-});
-
-window.addEventListener("load", () => {
-    const navigationEntries = performance.getEntriesByType("navigation");
-    const isReload = navigationEntries.length > 0 && navigationEntries[0].type === "reload";
-
-    if (isReload) {
-        // Page was refreshed → restore previous state if exists
-        const savedState = localStorage.getItem("pptkb1State");
-        if (savedState) {
-            const { bookType, unit, pageNum } = JSON.parse(savedState);
-            if (bookType === "student") {
-                loadStudentUnit(unit);
-                currentIndex = currentImages.findIndex(src => src.includes(`page${pageNum}.JPG`));
-                if (currentIndex >= 0) loadImage(currentImages[currentIndex]);
-            } else if (bookType === "activity") {
-                loadActivityUnit(unit);
-                currentIndex = currentImages.findIndex(src => src.includes(`page${pageNum}.JPG`));
-                if (currentIndex >= 0) loadImage(currentImages[currentIndex]);
-            }
-        } else {
-            loadHome(); // fallback if nothing saved
-        }
-    } else {
-        // First time opening → always Home
-        loadHome();
-    }
-});
-
-// ==========================
-// AUDIO FUNCTIONALITY FOR ALL UNITS
-// ==========================
-
-audioBtn.addEventListener("click", function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  // TOGGLE: hide if already visible
-    if (audioListContainer.style.display === "flex") {
-        audioListContainer.style.display = "none";
-        return;
-    }
-    // Clear previous buttons
-    audioListContainer.innerHTML = "";
-    audioListContainer.style.display = "flex";
-
-    if (currentImages.length === 0) return;
-
-    const pageSrc = currentImages[currentIndex];
-
-    // Determine if Student or Activity Book
-    let bookType;
-    if (pageSrc.includes("student-book-pages")) bookType = "student";
-    else if (pageSrc.includes("activity-book-pages")) bookType = "activity";
-    else return;
-
-    // Extract unit number
-    const unitMatch = pageSrc.match(/unit_(\d+)/i);
-    if (!unitMatch) return;
-    const unit = parseInt(unitMatch[1]);
-
-    // Extract page number
-    const pageMatch = pageSrc.match(/page(\d+)/i);
-    if (!pageMatch) return;
-    const pageNum = parseInt(pageMatch[1]);
-
-    // Define audio tracks for all units (Student Book)
-    const studentBookAudioTracks = {
-        1: {8:["page8_Track_1.1"],9:["page9_Track_1.2","page9_Track_1.3"],10:["br2_003_a1_4"]},
-        2: {13:["br2_003_a2_1"],15:["br2_003_a2_2"],16:["br2_003_a2_3"]},
-        3: {19:["br2_003_a3_1"],20:["br2_003_a3_2"],21:["br2_003_a3_3","br2_003_a3_4"],22:["br2_003_a3_5"]},
-        4: {27:["br2_003_a4_1"],28:["br2_003_a4_2"],29:["br2_003_a4_3"],30:["br2_003_a4_4"]},
-        5: {34:["br2_003_a5_1"],35:["br2_003_a5_2","br2_003_a5_3"],36:["br2_003_a5_4","br2_003_a5_5","br2_003_a5_6"]},
-        6: {38:["br2_003_a6_1"],41:["br2_003_a6_2","br2_003_a6_3"],42:["br2_003_a6_4"],43:["br2_003_a6_5"]},
-        7: {47:["br2_003_a7_1"],49:["br2_003_a7_2","br2_003_a7_3"],50:["br2_003_a7_4"]},
-        8: {54:["br2_003_a8_1"],55:["br2_003_a8_2"],56:["br2_003_a8_3"]},
-        9: {59:["br2_003_a9_1"],60:["br2_003_a9_2"],61:["br2_003_a9_3"],62:["br2_003_a9_4"],},
-        10: {67:["br2_003_a10_1"],68:["br2_003_a10_2"],69:["br2_003_a10_3"],70:["br2_003_a10_4"]},
-        11: {72:["br2_003_a11_1"],73:["br2_003_a11_1"],75:["br2_003_a11_2"],76:["br2_003_a11_3","br2_003_a11_4"]},
-        12: {79:["br2_003_a12_1"],81:["br2_003_a12_2"],82:["br2_003_a12_3","br2_003_a12_4","br2_003_a12_5"],83:["br2_003_a12_6"]},
-    };
-
-    // Define audio tracks for all units (Activity Book)
-    const activityBookAudioTracks = {
-        1: {4:["page4_Track_02"],15:["br2_003_a2_2"],7:["page7_Track_04"]},
-        2: {13:["br2_003_a2_1"],12:["page12_Track_06"],16:["page16_Track_07"]},
-        3: {18:["page18_Track_08"],19:["page19_Track_09"],20:["page20_Track_10"],21:["page21_Track_11"],22:["page22_Track_12"]},
-        4: {24:["page24_Track_13"],25:["page25_Track_14"],26:["page26_Track_15"],28:["page28_Track_16"]},
-        5: {34:["page34_Track_18"],36:["page36_Track_19"],38:["page38_Track_20"]},
-        6: {40:["page40_Track_21"],41:["page41_Track_22"],42:["page42_Track_23"],46:["page46_Track_24"]},
-        7: {48:["page48_Track_25"],50:["page50_Track_26"],52:["page52_Track_27"]},
-        8: {54:["page54_Track_28"],55:["page55_Track_29"],56:["page56_Track_30","page56_Track_31"],57:["page57_Track_32"],60:["page60_Track_33"],62:["page62_Track_34"]},
-        9: {64:["page64_Track_35"],66:["page66_Track_36"]},
-        10: {70:["page70_Track_37"],72:["page72_Track_38"],73:["page73_Track_39"]},
-        11: {78:["page78_Track_40"],80:["page80_Track_41"]},
-        12: {84:["page84_Track_42"],86:["page86_Track_43"],87:["page87_Track_44"] }
-    };
-
-    // Pick the correct track list
-    let tracks;
-    if (bookType === "student") tracks = studentBookAudioTracks[unit] ? studentBookAudioTracks[unit][pageNum] || [] : [];
-    else tracks = activityBookAudioTracks[unit] ? activityBookAudioTracks[unit][pageNum] || [] : [];
-
-    if (tracks.length === 0) {
-        
-        return;
-    }
-
-    // Create buttons for each track
-    tracks.forEach(track => {
-        const btn = document.createElement("button");
-        const trackNumber = track.split("_")[2]; // get number
-        btn.textContent = `Audio ${trackNumber}`;
-
-        btn.addEventListener("click", () => {
-            const folder = bookType === "student" ? "student-book-audios" : "activity-book-audios";
-            audioSource.src = `audios/${folder}/unit_${unit}/${track}.mp3`;
-            audioPlayer.load();
-            showAudioPlayer(); // <-- use the new function
-            audioPlayer.controls = true;
-        });
-
-        audioListContainer.appendChild(btn);
-    });
-});
-
-// Hide audio list if click outside
-window.addEventListener("click", () => {
-    audioListContainer.style.display = "none";
-});
-// ==========================
-// VIDEO FUNCTIONALITY FOR UNIT 1
-// ==========================
-
-const videoBtn = document.querySelector('a img[alt="Videos"]').parentElement;
-const videoListContainer = document.createElement("div");
-videoListContainer.id = "video-list-container";
-document.body.appendChild(videoListContainer);
-
-const videoPlayer = document.getElementById("slide-video");
-const videoSource = document.getElementById("video-source");
-const hideVideoBtn = document.getElementById("hide-video-btn");
-
-// Show video player and hide button
-function showVideoPlayer() {
-    videoPlayer.style.display = "block";
-    hideVideoBtn.style.display = "inline-block";
 }
 
-// Hide video player when hide button is clicked
-hideVideoBtn.addEventListener("click", () => {
-    videoPlayer.pause();
-    videoPlayer.style.display = "none";
-    hideVideoBtn.style.display = "none";
-});
 
-// Double-click to toggle fullscreen
-videoPlayer.addEventListener("dblclick", () => {
-    if (!document.fullscreenElement) {
-        videoPlayer.requestFullscreen().catch(err => console.log(err));
-    } else {
-        document.exitFullscreen();
-    }
-});
+/* ==========================================================
+   MULTIPLE CHOICE
+========================================================== */
 
-// Define videos for Unit 1
-// Define videos for Unit 1
-const unitVideos = {
-    1: {
-        10: ["presentation1"],
-        },
-    3: {
-        24: ["br2_004_v1_1","br2_004_v1_2"],
-        25: ["br2_004_v1_3"]
-    },
+function renderMultipleChoice(activity) {
 
-    6: {
-        44: ["br2_004_v2_1"],
-        45: ["br2_004_v2_2","br2_004_v2_3"]
-    },
+    const wrapper =
+        document.createElement("div");
 
-    9: {
-        64: ["br2_004_v3_1", "br2_004_v3_2"],
-        65: ["br2_004_v3_3","br2_004_v3_4","br2_004_v3_5","br2_004_v3_6"]
-    },
+    wrapper.className =
+        "exercise-content";
 
-    12: {
-        84: ["br2_004_v4_1"],
-        85: ["br2_004_v4_2","br2_004_v4_3","br2_004_v4_4"]
-    }
-};
-// Click event for video icon (Student Book only)
-videoBtn.addEventListener("click", function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-   // TOGGLE: hide if already visible
-    if (videoListContainer.style.display === "flex") {
-        videoListContainer.style.display = "none";
-        return;
-    }
 
-    // Clear previous buttons
-    videoListContainer.innerHTML = "";
-    videoListContainer.style.display = "flex";
+    wrapper.innerHTML = `
 
-    if (currentImages.length === 0) return;
+        <div class="eyebrow">
+            PRACTICE
+        </div>
 
-    const pageSrc = currentImages[currentIndex];
+        <h2>
+            ${activity.title}
+        </h2>
 
-    // ONLY show videos for Student Book pages
-    if (!pageSrc.includes("student-book-pages")) return; // <- key change
+        <div class="exercise-question">
+            ${activity.question}
+        </div>
 
-    // Extract unit number
-    const unitMatch = pageSrc.match(/unit_(\d+)/i);
-    if (!unitMatch) return;
-    const unit = parseInt(unitMatch[1]);
+        <div class="exercise-options"></div>
 
-    // Extract page number
-    const pageMatch = pageSrc.match(/page(\d+)/i);
-    if (!pageMatch) return;
-    const pageNum = parseInt(pageMatch[1]);
+        <div
+            class="exercise-feedback"
+            style="display:none"
+        ></div>
 
-    // Get videos for this page
-    const tracks = unitVideos[unit] ? unitVideos[unit][pageNum] || [] : [];
+    `;
 
-    if (tracks.length === 0) return; // <- do nothing if no videos
 
-    tracks.forEach((track, index) => {
-        const btn = document.createElement("button");
-        btn.textContent = `Video ${index + 1}`;
-
-        btn.addEventListener("click", () => {
-            videoSource.src = `video/unit_${unit}/${track}.mp4`;
-            videoPlayer.load();
-            showVideoPlayer();
-        });
-
-        videoListContainer.appendChild(btn);
-    });
-});
-
-// Hide video list if click outside
-window.addEventListener("click", () => {
-    videoListContainer.style.display = "none";
-});
-
-// ==========================
-// DRAWING TARGET SYSTEM (NEW CORE FIX)
-// ==========================
-
-const editCanvas = document.getElementById("edit-canvas");
-const editCtx = editCanvas.getContext("2d");
-
-const whiteboardCanvas = document.getElementById("whiteboard-canvas");
-const whiteboardCtx = whiteboardCanvas.getContext("2d");
-
-// ACTIVE CANVAS
-let drawingCanvas = editCanvas;
-let drawingCtx = editCtx;
-
-// Switch drawing target
-function setDrawingTarget(type) {
-
-    if (type === "whiteboard") {
-        drawingCanvas = whiteboardCanvas;
-        drawingCtx = whiteboardCtx;
-    } else {
-        drawingCanvas = editCanvas;
-        drawingCtx = editCtx;
-    }
-
-    updateCursor();
-}
-
-// ==========================
-// EDIT TRAY TOGGLE SYSTEM
-// ==========================
-
-const editBtn = document.getElementById("edit-btn");
-const editTray = document.getElementById("edit-tray");
-const pencilTool = document.getElementById("pencil-tool");
-
-editBtn.addEventListener("click", function(e) {
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    editTray.style.display =
-        editTray.style.display === "flex"
-            ? "none"
-            : "flex";
-});
-
-// ==========================
-// WHITEBOARD TOGGLE
-// ==========================
-
-const whiteboardBtn = document.getElementById("whiteboard-btn");
-const whiteboard = document.getElementById("whiteboard");
-
-whiteboardBtn.addEventListener("click", function(e) {
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (whiteboard.style.display === "flex") {
-
-        whiteboard.style.display = "none";
-        editTray.style.display = "none";
-
-        setDrawingTarget("slide");
-
-    } else {
-
-        whiteboard.style.display = "flex";
-        editTray.style.display = "flex";
-
-        resizeWhiteboardCanvas();
-
-        setDrawingTarget("whiteboard");
-    }
-});
-
-// Hide whiteboard when changing pages
-studentDropdownLinks.forEach(link => {
-
-    link.addEventListener("click", () => {
-
-        whiteboard.style.display = "none";
-        editTray.style.display = "none";
-
-        setDrawingTarget("slide");
-    });
-});
-
-activityDropdownLinks.forEach(link => {
-
-    link.addEventListener("click", () => {
-
-        whiteboard.style.display = "none";
-        editTray.style.display = "none";
-
-        setDrawingTarget("slide");
-    });
-});
-
-// ==========================
-// TOOL SYSTEM
-// ==========================
-
-let currentTool = null;
-function setTool(tool) {
-
-    // toggle OFF
-    if (currentTool === tool) {
-
-        currentTool = null;
-
-    } else {
-
-        currentTool = tool;
-    }
-
-    updateToolUI();
-    updateCursor();
-}
-const penTool = document.getElementById("pen-tool");
-const eraserTool = document.getElementById("eraser-tool");
-const highlightTool = document.getElementById("highlight-tool");
-const textTool = document.getElementById("text-tool");
-const clearTool = document.getElementById("clear-tool");
-
-pencilTool.addEventListener("click", () => setTool("pencil"));
-penTool.addEventListener("click", () => setTool("pen"));
-eraserTool.addEventListener("click", () => setTool("eraser"));
-highlightTool.addEventListener("click", () => setTool("marker"));
-
-textTool.addEventListener("click", () => setTool("text"));
-function updateToolUI() {
-
-    const tools = {
-        pencil: pencilTool,
-        pen: penTool,
-        eraser: eraserTool,
-        marker: highlightTool,
-        text: textTool
-    };
-
-    Object.values(tools).forEach(btn => {
-        if (btn) btn.classList.remove("active-tool");
-    });
-
-    if (tools[currentTool]) {
-        tools[currentTool].classList.add("active-tool");
-    }
-}
-// ==========================
-// CLEAR CURRENT CANVAS
-// ==========================
-
-clearTool.addEventListener("click", () => {
-
-    const currentCanvasId = drawingCanvas.id;
-
-    // Remove only strokes from current canvas
-    strokes = strokes.filter(stroke => {
-        return stroke.canvas !== currentCanvasId;
-    });
-
-    // Clear actual canvas
-    if (currentCanvasId === "whiteboard-canvas") {
-
-        whiteboardCtx.clearRect(
-            0,
-            0,
-            whiteboardCanvas.width,
-            whiteboardCanvas.height
+    const options =
+        wrapper.querySelector(
+            ".exercise-options"
         );
 
-    } else {
 
-        editCtx.clearRect(
-            0,
-            0,
-            editCanvas.width,
-            editCanvas.height
-        );
-    }
+    activity.options.forEach(
+        (option, index) => {
 
-    redrawStrokes();
-});
-// ==========================
-// CURSOR SYSTEM
-// ==========================
+            const button =
+                document.createElement("button");
 
-function updateCursor() {
+            button.className =
+                "exercise-option";
 
-    if (currentTool === "text") {
+            button.textContent =
+                option;
 
-        drawingCanvas.style.cursor = "text";
 
-        // allow clicking textboxes
-        editCanvas.style.pointerEvents = "none";
+            button.addEventListener(
+                "click",
+                () => {
 
-    } else {
+                    checkMultipleChoice(
+                        activity,
+                        index,
+                        button,
+                        wrapper
+                    );
 
-        editCanvas.style.pointerEvents = "auto";
-
-        if (currentTool === "eraser") {
-            drawingCanvas.style.cursor = "crosshair";
-        }
-
-        else if (currentTool === "marker") {
-            drawingCanvas.style.cursor = "cell";
-        }
-
-        else {
-            drawingCanvas.style.cursor = "default";
-        }
-    }
-}
-// ==========================
-// DRAWING ENGINE
-// ==========================
-
-let strokes = [];
-let currentStroke = null;
-let drawing = false;
-
-let pencilSize = 3;
-
-// ==========================
-// RESIZE SYSTEM
-// ==========================
-
-function resizeEditCanvas() {
-
-    const rect = slideImage.getBoundingClientRect();
-
-    editCanvas.width = rect.width;
-    editCanvas.height = rect.height;
-
-    editCanvas.style.left = slideImage.offsetLeft + "px";
-    editCanvas.style.top = slideImage.offsetTop + "px";
-
-    redrawStrokes();
-    rerenderAllTextBoxes();
-}
-
-function resizeWhiteboardCanvas() {
-
-    whiteboardCanvas.width = whiteboard.offsetWidth;
-    whiteboardCanvas.height = whiteboard.offsetHeight;
-
-    redrawStrokes();
-}
-
-window.addEventListener("resize", () => {
-
-    resizeEditCanvas();
-    resizeWhiteboardCanvas();
-});
-
-// ==========================
-// POSITION SYSTEM
-// ==========================
-
-function getPos(e, canvas) {
-
-    const rect = canvas.getBoundingClientRect();
-
-    return {
-        x: (e.clientX - rect.left) / canvas.width,
-        y: (e.clientY - rect.top) / canvas.height
-    };
-}
-
-// ==========================
-// DRAW START
-// ==========================
-
-function startDrawing(e, canvas) {
-if (!currentTool) return;
-    const { x, y } = getPos(e, canvas);
-
-    if (currentTool === "eraser") {
-
-        drawing = true;
-
-        eraseAt(x, y, canvas.id);
-
-        redrawStrokes();
-
-        return;
-    }
-
-    drawing = true;
-
-    let color = "red";
-    let size = pencilSize;
-
-    if (currentTool === "pen") {
-
-        color = "blue";
-        size = 4;
-    }
-
-    if (currentTool === "marker") {
-
-        color = "rgba(255,255,0,0.4)";
-        size = 18;
-    }
-
-    currentStroke = {
-        type: "stroke",
-        canvas: canvas.id,
-        color,
-        size,
-        points: [{ x, y }]
-    };
-
-    strokes.push(currentStroke);
-}
-
-// ==========================
-// DRAW MOVE
-// ==========================
-
-function moveDrawing(e, canvas) {
-
-    if (!drawing) return;
-
-    const { x, y } = getPos(e, canvas);
-
-    if (currentTool === "eraser") {
-
-        eraseAt(x, y, canvas.id);
-
-        redrawStrokes();
-
-        return;
-    }
-
-    currentStroke.points.push({ x, y });
-
-    redrawStrokes();
-}
-
-// ==========================
-// DRAW STOP
-// ==========================
-
-function stopDrawing() {
-
-    drawing = false;
-}
-
-// ==========================
-// EDIT CANVAS EVENTS
-// ==========================
-
-editCanvas.addEventListener("mousedown", (e) => {
-    startDrawing(e, editCanvas);
-});
-
-editCanvas.addEventListener("mousemove", (e) => {
-    moveDrawing(e, editCanvas);
-});
-
-editCanvas.addEventListener("mouseup", stopDrawing);
-
-editCanvas.addEventListener("mouseleave", stopDrawing);
-
-// ==========================
-// WHITEBOARD EVENTS
-// ==========================
-
-whiteboardCanvas.addEventListener("mousedown", (e) => {
-    startDrawing(e, whiteboardCanvas);
-});
-
-whiteboardCanvas.addEventListener("mousemove", (e) => {
-    moveDrawing(e, whiteboardCanvas);
-});
-
-whiteboardCanvas.addEventListener("mouseup", stopDrawing);
-
-whiteboardCanvas.addEventListener("mouseleave", stopDrawing);
-
-// ==========================
-// ERASER SYSTEM
-// ==========================
-
-function eraseAt(x, y, canvasId) {
-
-    const radius = 0.01;
-
-    strokes = strokes.flatMap(stroke => {
-
-        if (stroke.canvas !== canvasId) return [stroke];
-
-        let newStrokes = [];
-        let temp = [];
-
-        for (let p of stroke.points) {
-
-            const dx = p.x - x;
-            const dy = p.y - y;
-
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist > radius) {
-
-                temp.push(p);
-
-            } else {
-
-                if (temp.length) {
-
-                    newStrokes.push({
-                        type: "stroke",
-                        canvas: stroke.canvas,
-                        color: stroke.color,
-                        size: stroke.size,
-                        points: temp
-                    });
-
-                    temp = [];
                 }
-            }
+            );
+
+
+            options.appendChild(
+                button
+            );
+
         }
-
-        if (temp.length) {
-
-            newStrokes.push({
-                type: "stroke",
-                canvas: stroke.canvas,
-                color: stroke.color,
-                size: stroke.size,
-                points: temp
-            });
-        }
-
-        return newStrokes;
-    });
-}
-
-// ==========================
-// REDRAW SYSTEM
-// ==========================
-
-function redrawStrokes() {
-
-    editCtx.clearRect(0, 0, editCanvas.width, editCanvas.height);
-
-    whiteboardCtx.clearRect(
-        0,
-        0,
-        whiteboardCanvas.width,
-        whiteboardCanvas.height
     );
 
-    strokes.forEach(item => {
 
-        let ctx;
-        let canvas;
+    activityContent.appendChild(
+        wrapper
+    );
 
-        if (item.canvas === "whiteboard-canvas") {
+}
 
-            ctx = whiteboardCtx;
-            canvas = whiteboardCanvas;
 
-        } else {
+/* ==========================================================
+   CHECK MULTIPLE CHOICE
+========================================================== */
 
-            ctx = editCtx;
-            canvas = editCanvas;
+function checkMultipleChoice(
+    activity,
+    selected,
+    selectedButton,
+    wrapper
+) {
+
+    if (
+        answeredActivities[
+            activity.id
+        ]
+    ) {
+
+        return;
+
+    }
+
+
+    const buttons =
+        wrapper.querySelectorAll(
+            ".exercise-option"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            button.disabled = true;
+
         }
+    );
 
-        ctx.strokeStyle = item.color;
-        ctx.lineWidth = item.size;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
 
-        ctx.beginPath();
+    const feedback =
+        wrapper.querySelector(
+            ".exercise-feedback"
+        );
 
-        item.points.forEach((p, i) => {
 
-            const x = p.x * canvas.width;
-            const y = p.y * canvas.height;
+    if (
+        selected === activity.answer
+    ) {
 
-            if (i === 0) {
+        selectedButton.classList.add(
+            "correct"
+        );
 
-                ctx.moveTo(x, y);
+        feedback.innerHTML = `
+            <strong>✓ Correct!</strong><br>
+            ${activity.explanation || ""}
+        `;
+
+        lessonScore++;
+
+    } else {
+
+        selectedButton.classList.add(
+            "incorrect"
+        );
+
+        buttons[
+            activity.answer
+        ].classList.add(
+            "correct"
+        );
+
+        feedback.innerHTML = `
+            <strong>Not quite.</strong><br>
+            ${activity.explanation || ""}
+        `;
+
+    }
+
+
+    feedback.style.display =
+        "block";
+
+
+    answeredActivities[
+        activity.id
+    ] = true;
+
+
+    saveProgress();
+
+    renderLessonCards();
+
+}
+
+
+/* ==========================================================
+   TEXT EXERCISE
+========================================================== */
+
+function renderTextExercise(activity) {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "exercise-content";
+
+
+    wrapper.innerHTML = `
+
+        <div class="eyebrow">
+            PRACTICE
+        </div>
+
+        <h2>
+            ${activity.title}
+        </h2>
+
+        <div class="exercise-question">
+            ${activity.question}
+        </div>
+
+        <input
+            class="exercise-input"
+            type="text"
+            autocomplete="off"
+            placeholder="Type your answer..."
+        >
+
+        <button
+            class="primary-button check-answer"
+            style="margin-top:15px"
+        >
+            Check answer
+        </button>
+
+        <div
+            class="exercise-feedback"
+            style="display:none"
+        ></div>
+
+    `;
+
+
+    const input =
+        wrapper.querySelector(
+            ".exercise-input"
+        );
+
+    const checkButton =
+        wrapper.querySelector(
+            ".check-answer"
+        );
+
+    const feedback =
+        wrapper.querySelector(
+            ".exercise-feedback"
+        );
+
+
+    checkButton.addEventListener(
+        "click",
+        () => {
+
+            if (
+                answeredActivities[
+                    activity.id
+                ]
+            ) return;
+
+
+            const userAnswer =
+                input.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const correct =
+                userAnswer ===
+                String(activity.answer)
+                    .trim()
+                    .toLowerCase();
+
+
+            if (correct) {
+
+                feedback.innerHTML = `
+                    <strong>✓ Correct!</strong><br>
+                    ${activity.explanation || ""}
+                `;
+
+                lessonScore++;
 
             } else {
 
-                ctx.lineTo(x, y);
+                feedback.innerHTML = `
+                    <strong>Not quite.</strong><br>
+                    The correct answer is:
+                    <strong>${activity.answer}</strong><br>
+                    ${activity.explanation || ""}
+                `;
+
             }
-        });
 
-        ctx.stroke();
-    });
+
+            feedback.style.display =
+                "block";
+
+
+            input.disabled = true;
+
+            checkButton.disabled = true;
+
+
+            answeredActivities[
+                activity.id
+            ] = true;
+
+
+            saveProgress();
+
+            renderLessonCards();
+
+        }
+    );
+
+
+    activityContent.appendChild(
+        wrapper
+    );
+
 }
 
-// ==========================
-// TEXT TOOL (FIXED VERSION)
-// ==========================
 
-let activeTextBox = null;
+/* ==========================================================
+   LISTENING
+========================================================== */
 
-// click handler
-editCanvas.addEventListener("click", handleTextClick);
-whiteboardCanvas.addEventListener("click", handleTextClick);
+function renderListening(activity) {
 
-function handleTextClick(e) {
-    if (currentTool !== "text") return;
+    const wrapper =
+        document.createElement("div");
 
-    const canvas = drawingCanvas;
-    const rect = canvas.getBoundingClientRect();
+    wrapper.className =
+        "exercise-content";
 
-    // FIX: correct absolute positioning (no shift left anymore)
-const x = (e.clientX - rect.left) / rect.width;
-const y = (e.clientY - rect.top) / rect.height;
 
-    createTextBox(x, y, canvas);
-}
+    wrapper.innerHTML = `
 
-// ==========================
-// CREATE TEXT BOX (FIXED)
-// ==========================
-function createTextBox(x, y, canvas) {
+        <div class="eyebrow">
+            LISTENING
+        </div>
 
-    const box = document.createElement("div");
+        <h2>
+            ${activity.title}
+        </h2>
 
-    box.contentEditable = true;
-    box.classList.add("slide-textbox");
+        <p>
+            Listen carefully before answering.
+        </p>
 
-    box.dataset.x = x;
-    box.dataset.y = y;
-    box.dataset.canvas = canvas.id;
+    `;
 
-    box.style.position = "absolute";
 
-    // POSITION
-    const rect = canvas.getBoundingClientRect();
+    if (activity.audio) {
 
-    box.style.left = (x * rect.width) + "px";
-    box.style.top = (y * rect.height) + "px";
+        const audio =
+            document.createElement("audio");
 
-    // STYLE
-    box.style.minWidth = "50px";
-    box.style.minHeight = "20px";
-    box.style.color = "red";
-    box.style.fontSize = "28px";
-    box.style.fontWeight = "bold";
-    box.style.outline = "none";
-    box.style.cursor = "move";
-    box.style.zIndex = "999999"; // VERY IMPORTANT
-    box.style.pointerEvents = "auto"; // VERY IMPORTANT
+        audio.controls = true;
 
-    // allow interaction
-    box.style.userSelect = "text";
+        audio.src =
+            activity.audio;
 
-    canvas.parentElement.appendChild(box);
+        audio.style.width =
+            "100%";
 
-    box.focus();
+        audio.style.margin =
+            "25px 0";
 
-    activeTextBox = box;
+        wrapper.appendChild(
+            audio
+        );
 
-    showTextToolbar(box);
+    } else {
 
-    enableDrag(box);
-}
+        const notice =
+            document.createElement("div");
 
-// ==========================
-// TOOLBAR (FIXED POSITIONING)
-// ==========================
-const textToolbar = document.createElement("div");
+        notice.className =
+            "exercise-feedback";
 
-textToolbar.style.position = "absolute";
-textToolbar.style.display = "none";
-textToolbar.style.gap = "6px";
-textToolbar.style.padding = "5px";
-textToolbar.style.background = "#fff";
-textToolbar.style.border = "1px solid #ccc";
-textToolbar.style.zIndex = "99999";
-textToolbar.style.borderRadius = "6px";
+        notice.textContent =
+            "Add the audio file to this activity later.";
 
-document.body.appendChild(textToolbar);
+        wrapper.appendChild(
+            notice
+        );
 
-function showTextToolbar(box) {
-
-    textToolbar.innerHTML = "";
-
-    textToolbar.style.display = "flex";
-
-    // FIX: real screen position (not offsetLeft/Top)
-    const rect = box.getBoundingClientRect();
-
-    textToolbar.style.left = rect.left + "px";
-    textToolbar.style.top = (rect.top - 40) + "px";
-
-    // DELETE
-    const del = document.createElement("button");
-    del.innerText = "🗑️";
-    del.onclick = () => {
-        box.remove();
-        textToolbar.style.display = "none";
-    };
-
-    // SIZE +
-    const plus = document.createElement("button");
-    plus.innerText = "A+";
-    plus.onclick = () => {
-        let size = parseInt(window.getComputedStyle(box).fontSize);
-        box.style.fontSize = (size + 2) + "px";
-    };
-
-    // SIZE -
-    const minus = document.createElement("button");
-    minus.innerText = "A-";
-    minus.onclick = () => {
-        let size = parseInt(window.getComputedStyle(box).fontSize);
-        if (size > 10) box.style.fontSize = (size - 2) + "px";
-    };
-
-    // COLORS
-    const red = document.createElement("button");
-    red.innerText = "🔴";
-    red.onclick = () => box.style.color = "red";
-
-    const black = document.createElement("button");
-    black.innerText = "⚫";
-    black.onclick = () => box.style.color = "black";
-
-    const blue = document.createElement("button");
-    blue.innerText = "🔵";
-    blue.onclick = () => box.style.color = "blue";
-
-    textToolbar.append(del, plus, minus, red, black, blue);
-}
-
-// hide toolbar when clicking outside
-document.addEventListener("click", (e) => {
-    if (e.target.contentEditable === "true") {
-        activeTextBox = e.target;
-        showTextToolbar(e.target);
-    } else if (!textToolbar.contains(e.target)) {
-        textToolbar.style.display = "none";
     }
-});
 
-// ==========================
-// DRAG TEXT BOX (NEW FEATURE)
-// ==========================
-function enableDrag(el) {
-    let offsetX = 0;
-    let offsetY = 0;
-    let dragging = false;
 
-    el.addEventListener("mousedown", (e) => {
-        dragging = true;
+    const question =
+        document.createElement("div");
 
-        const rect = el.getBoundingClientRect();
+    question.className =
+        "exercise-question";
 
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
+    question.textContent =
+        activity.question;
 
-        document.body.style.userSelect = "none";
-    });
+    wrapper.appendChild(
+        question
+    );
 
-    document.addEventListener("mousemove", (e) => {
-        if (!dragging) return;
 
-        const parentRect = el.parentElement.getBoundingClientRect();
+    const options =
+        document.createElement("div");
 
-        el.style.left = (e.clientX - parentRect.left - offsetX) + "px";
-        el.style.top = (e.clientY - parentRect.top - offsetY) + "px";
-    });
+    options.className =
+        "exercise-options";
 
-    document.addEventListener("mouseup", () => {
-        dragging = false;
-        document.body.style.userSelect = "auto";
-    });
+
+    activity.options.forEach(
+        (option, index) => {
+
+            const button =
+                document.createElement("button");
+
+            button.className =
+                "exercise-option";
+
+            button.textContent =
+                option;
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    checkMultipleChoice(
+                        activity,
+                        index,
+                        button,
+                        wrapper
+                    );
+
+                }
+            );
+
+
+            options.appendChild(
+                button
+            );
+
+        }
+    );
+
+
+    wrapper.appendChild(
+        options
+    );
+
+
+    const feedback =
+        document.createElement("div");
+
+    feedback.className =
+        "exercise-feedback";
+
+    feedback.style.display =
+        "none";
+
+    wrapper.appendChild(
+        feedback
+    );
+
+
+    activityContent.appendChild(
+        wrapper
+    );
+
 }
-// ==========================
-// INITIAL SETUP
-// ==========================
 
-window.addEventListener("load", () => {
 
-    setDrawingTarget("slide");
+/* ==========================================================
+   VIDEO
+========================================================== */
 
-    resizeEditCanvas();
-    resizeWhiteboardCanvas();
+function renderVideo(activity) {
 
-    updateCursor(); // safe initial call
+    const wrapper =
+        document.createElement("div");
 
-});
+    wrapper.className =
+        "explanation-content";
 
-// ==========================
-// CURSOR SYSTEM
-// ==========================
 
-function updateCursor() {
+    wrapper.innerHTML = `
 
-    if (!drawingCanvas) return;
+        <div class="eyebrow">
+            VIDEO
+        </div>
 
-    // NO TOOL SELECTED
-    if (!currentTool) {
-        drawingCanvas.style.cursor = "default";
+        <h2>
+            ${activity.title}
+        </h2>
+
+        <p>
+            ${activity.description || ""}
+        </p>
+
+    `;
+
+
+    if (activity.video) {
+
+        const video =
+            document.createElement("video");
+
+        video.controls = true;
+
+        video.className =
+            "ai-teacher-video";
+
+        video.src =
+            activity.video;
+
+        wrapper.appendChild(
+            video
+        );
+
+    }
+
+
+    activityContent.appendChild(
+        wrapper
+    );
+
+
+    markActivityViewed(
+        activity.id
+    );
+
+}
+
+
+/* ==========================================================
+   AUDIO
+========================================================== */
+
+function renderAudio(activity) {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "explanation-content";
+
+
+    wrapper.innerHTML = `
+
+        <div class="eyebrow">
+            AUDIO
+        </div>
+
+        <h2>
+            ${activity.title}
+        </h2>
+
+        <p>
+            ${activity.description || ""}
+        </p>
+
+    `;
+
+
+    if (activity.audio) {
+
+        const audio =
+            document.createElement("audio");
+
+        audio.controls = true;
+
+        audio.src =
+            activity.audio;
+
+        audio.style.width =
+            "100%";
+
+        audio.style.marginTop =
+            "25px";
+
+        wrapper.appendChild(
+            audio
+        );
+
+    }
+
+
+    activityContent.appendChild(
+        wrapper
+    );
+
+
+    markActivityViewed(
+        activity.id
+    );
+
+}
+
+
+/* ==========================================================
+   SPEAKING
+========================================================== */
+
+function renderSpeaking(activity) {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "speaking-exercise";
+
+
+    wrapper.innerHTML = `
+
+        <div class="eyebrow">
+            SPEAKING
+        </div>
+
+        <h2>
+            ${activity.title}
+        </h2>
+
+        <p>
+            ${activity.instructions || ""}
+        </p>
+
+        <button
+            class="primary-button start-speaking-button"
+        >
+            Start conversation 🎙️
+        </button>
+
+    `;
+
+
+    wrapper.querySelector(
+        ".start-speaking-button"
+    ).addEventListener(
+        "click",
+        () => {
+
+            openSpeakingActivity(
+                activity
+            );
+
+        }
+    );
+
+
+    activityContent.appendChild(
+        wrapper
+    );
+
+}
+
+
+/* ==========================================================
+   SPEAKING MODAL
+========================================================== */
+
+function openSpeakingActivity(
+    activity
+) {
+
+    const modal =
+        document.getElementById(
+            "speaking-modal"
+        );
+
+    const aiMessage =
+        document.getElementById(
+            "ai-message"
+        );
+
+    aiMessage.textContent =
+        activity.aiOpening ||
+        "Hello! Let's practise English together.";
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+
+    speakText(
+        aiMessage.textContent
+    );
+
+}
+
+
+/* ==========================================================
+   TEXT TO SPEECH
+========================================================== */
+
+function speakText(text) {
+
+    if (
+        !("speechSynthesis" in window)
+    ) {
+
         return;
+
     }
 
-    // ERASER
-    if (currentTool === "eraser") {
-        drawingCanvas.style.cursor = "crosshair";
-    }
 
-    // TEXT TOOL
-    else if (currentTool === "text") {
-        drawingCanvas.style.cursor = "text";
-    }
+    window.speechSynthesis.cancel();
 
-    // MARKER / HIGHLIGHT
-    else if (currentTool === "marker") {
-        drawingCanvas.style.cursor = "cell";
-    }
 
-    // DEFAULT FOR ALL OTHER TOOLS
-    else {
-        drawingCanvas.style.cursor = "pointer";
-    }
+    const utterance =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+    utterance.lang =
+        "en-US";
+
+    utterance.rate =
+        0.95;
+
+
+    window.speechSynthesis.speak(
+        utterance
+    );
+
 }
 
 
+/* ==========================================================
+   SPEECH RECOGNITION
+========================================================== */
+
+function setupSpeechRecognition() {
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+    if (!SpeechRecognition) {
+
+        return;
+
+    }
+
+
+    recognition =
+        new SpeechRecognition();
+
+
+    recognition.lang =
+        "en-US";
+
+    recognition.interimResults =
+        false;
+
+    recognition.continuous =
+        false;
+
+
+    recognition.onstart = () => {
+
+        isRecording = true;
+
+        document
+            .getElementById(
+                "microphone-button"
+            )
+            .classList.add(
+                "recording"
+            );
+
+
+        document
+            .getElementById(
+                "speaking-indicator"
+            )
+            .classList.add(
+                "active"
+            );
+
+
+        document
+            .getElementById(
+                "speaking-status-text"
+            )
+            .textContent =
+            "Listening...";
+
+    };
+
+
+    recognition.onresult = event => {
+
+        const transcript =
+            event.results[0][0].transcript;
+
+
+        document
+            .getElementById(
+                "student-transcript"
+            )
+            .textContent =
+            transcript;
+
+
+        document
+            .getElementById(
+                "speaking-status-text"
+            )
+            .textContent =
+            "Response captured.";
+
+    };
+
+
+    recognition.onend = () => {
+
+        isRecording = false;
+
+        document
+            .getElementById(
+                "microphone-button"
+            )
+            .classList.remove(
+                "recording"
+            );
+
+
+        document
+            .getElementById(
+                "speaking-indicator"
+            )
+            .classList.remove(
+                "active"
+            );
+
+    };
+
+}
+
+
+/* ==========================================================
+   MICROPHONE
+========================================================== */
+
+document
+    .getElementById(
+        "microphone-button"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            if (!recognition) {
+
+                alert(
+                    "Speech recognition is not available in this browser."
+                );
+
+                return;
+
+            }
+
+
+            if (isRecording) {
+
+                recognition.stop();
+
+            } else {
+
+                recognition.start();
+
+            }
+
+        }
+    );
+
+
+/* ==========================================================
+   FINISH SPEAKING
+========================================================== */
+
+document
+    .getElementById(
+        "speaking-submit"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            const lesson =
+                COURSE_DATA.units[currentUnit]
+                .lessons[currentLesson];
+
+
+            const activity =
+                lesson.activities[currentActivity];
+
+
+            answeredActivities[
+                activity.id
+            ] = true;
+
+
+            /*
+             * At this stage the speaking activity
+             * is marked as completed.
+             *
+             * Later this is where we can connect
+             * the platform to a real AI evaluation API.
+             */
+
+
+            saveProgress();
+
+            document
+                .getElementById(
+                    "speaking-modal"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+
+            renderLessonCards();
+
+            updateLessonProgress();
+
+        }
+    );
+
+
+/* ==========================================================
+   CLOSE SPEAKING
+========================================================== */
+
+document
+    .getElementById(
+        "close-speaking"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            document
+                .getElementById(
+                    "speaking-modal"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+            window.speechSynthesis.cancel();
+
+        }
+    );
+
+
+/* ==========================================================
+   MARK VIEWED
+========================================================== */
+
+function markActivityViewed(
+    id
+) {
+
+    answeredActivities[id] =
+        true;
+
+    saveProgress();
+
+    renderLessonCards();
+
+}
+
+
+/* ==========================================================
+   NEXT ACTIVITY
+========================================================== */
+
+nextActivity.addEventListener(
+    "click",
+    () => {
+
+        const lesson =
+            COURSE_DATA.units[currentUnit]
+            .lessons[currentLesson];
+
+
+        if (
+            currentActivity <
+            lesson.activities.length - 1
+        ) {
+
+            currentActivity++;
+
+            renderActivity();
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        } else {
+
+            completeLesson();
+
+        }
+
+    }
+);
+
+
+/* ==========================================================
+   PREVIOUS ACTIVITY
+========================================================== */
+
+previousActivity.addEventListener(
+    "click",
+    () => {
+
+        if (
+            currentActivity > 0
+        ) {
+
+            currentActivity--;
+
+            renderActivity();
+
+        }
+
+    }
+);
+
+
+/* ==========================================================
+   BACK
+========================================================== */
+
+document
+    .getElementById(
+        "back-to-lesson"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            showLessonHome();
+
+            renderLessonCards();
+
+        }
+    );
+
+
+/* ==========================================================
+   COMPLETE LESSON
+========================================================== */
+
+function completeLesson() {
+
+    const lesson =
+        COURSE_DATA.units[currentUnit]
+        .lessons[currentLesson];
+
+
+    const totalScored =
+        lesson.activities.filter(
+            activity =>
+                activity.type ===
+                "multiple-choice" ||
+                activity.type ===
+                "text" ||
+                activity.type ===
+                "listening"
+        ).length;
+
+
+    const percentage =
+        totalScored > 0
+            ?
+            Math.round(
+                (lessonScore /
+                    totalScored) * 100
+            )
+            :
+            100;
+
+
+    finalScore.textContent =
+        percentage + "%";
+
+
+    activityArea.classList.add(
+        "hidden"
+    );
+
+    lessonHome.classList.add(
+        "hidden"
+    );
+
+    completionScreen.classList.remove(
+        "hidden"
+    );
+
+
+    const unit =
+        COURSE_DATA.units[currentUnit];
+
+
+    const lessonKey =
+        `${unit.id}_${lesson.id}`;
+
+
+    const progress =
+        getProgress();
+
+
+    progress[lessonKey] = {
+
+        completed: true,
+
+        score: percentage,
+
+        answered:
+            answeredActivities
+
+    };
+
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(progress)
+    );
+
+
+    updateCourseProgress();
+
+}
+
+
+/* ==========================================================
+   REVIEW LESSON
+========================================================== */
+
+document
+    .getElementById(
+        "review-lesson-btn"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            currentActivity = 0;
+
+            completionScreen.classList.add(
+                "hidden"
+            );
+
+            activityArea.classList.remove(
+                "hidden"
+            );
+
+            renderActivity();
+
+        }
+    );
+
+
+/* ==========================================================
+   NEXT LESSON
+========================================================== */
+
+document
+    .getElementById(
+        "next-lesson-btn"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            const unit =
+                COURSE_DATA.units[
+                    currentUnit
+                ];
+
+
+            if (
+                currentLesson <
+                unit.lessons.length - 1
+            ) {
+
+                openLesson(
+                    currentUnit,
+                    currentLesson + 1
+                );
+
+                return;
+
+            }
+
+
+            if (
+                currentUnit <
+                COURSE_DATA.units.length - 1
+            ) {
+
+                openLesson(
+                    currentUnit + 1,
+                    0
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                "Congratulations! You have completed the course."
+            );
+
+        }
+    );
+
+
+/* ==========================================================
+   LESSON PROGRESS
+========================================================== */
+
+function updateLessonProgress() {
+
+    const lesson =
+        COURSE_DATA.units[currentUnit]
+        .lessons[currentLesson];
+
+
+    const total =
+        lesson.activities.length;
+
+
+    const completed =
+        Object.keys(
+            answeredActivities
+        ).length;
+
+
+    const percentage =
+        Math.round(
+            (completed / total) * 100
+        );
+
+
+    lessonProgressText.textContent =
+        percentage + "%";
+
+
+    lessonProgressBar.style.width =
+        percentage + "%";
+
+}
+
+
+/* ==========================================================
+   COURSE PROGRESS
+========================================================== */
+
+function updateCourseProgress() {
+
+    let totalLessons = 0;
+
+    let completedLessons = 0;
+
+
+    const progress =
+        getProgress();
+
+
+    COURSE_DATA.units.forEach(
+        unit => {
+
+            unit.lessons.forEach(
+                lesson => {
+
+                    totalLessons++;
+
+
+                    const key =
+                        `${unit.id}_${lesson.id}`;
+
+
+                    if (
+                        progress[key]?.completed
+                    ) {
+
+                        completedLessons++;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    const percentage =
+        totalLessons
+            ?
+            Math.round(
+                completedLessons /
+                totalLessons *
+                100
+            )
+            :
+            0;
+
+
+    courseProgressText.textContent =
+        percentage + "%";
+
+
+    courseProgressBar.style.width =
+        percentage + "%";
+
+}
+
+
+/* ==========================================================
+   START LESSON
+========================================================== */
+
+document
+    .getElementById(
+        "start-lesson-btn"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            openActivity(0);
+
+        }
+    );
+
+
+/* ==========================================================
+   MOBILE MENU
+========================================================== */
+
+document
+    .getElementById(
+        "mobile-menu-btn"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            document
+                .querySelector(
+                    ".sidebar"
+                )
+                .classList.toggle(
+                    "mobile-open"
+                );
+
+        }
+    );
+
+
+/* ==========================================================
+   INITIALISE
+========================================================== */
+
+document
+    .getElementById(
+        "close-media"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            document
+                .getElementById(
+                    "media-modal"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+        }
+    );
+
+
+window.addEventListener(
+    "load",
+    () => {
+
+        renderUnitNavigation();
+
+        openLesson(
+            0,
+            0
+        );
+
+        updateCourseProgress();
+
+        setupSpeechRecognition();
+
+    }
+);
